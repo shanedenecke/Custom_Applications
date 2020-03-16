@@ -46,14 +46,28 @@ final_fa=[]
 ###parse table to include only first instance of domain
 for i in unigenes:
     sub_base=hmmsearch[hmmsearch['geneid']==i]
-    minstart=min(sub_base['start'])
-    sub_real=sub_base[sub_base['start']==minstart].iloc[:]
+    target_fa=list([x for x in sub_fa if x.id==sub_base.iloc[0,:]['geneid']])
+    
+    if len(target_fa)==0):
+        print(i+' Sequence not found in fasta file')
+        continue
+    elif len(target_fa>1):
+         print(i+' Duplicate sequences found in file')
+         continue
     
     
-    target_fa=[x for x in sub_fa if x.id==sub_real.iloc[0,:]['geneid']][0]
-    target_fa.seq=target_fa.seq[int(sub_real['start']):int(sub_real['stop'])]
-    
-    final_fa.append(target_fa)
+    if sub_base.shape[0]==0:
+        print(i+' Has no Relevant domain')
+        continue
+    if sub_base.shape[0]>0:
+        target_fa=target_fa[0]
+        minstart=min(sub_base['start'])
+        sub_real=sub_base[sub_base['start']==minstart].iloc[:]
+        target_fa.seq=target_fa.seq[int(sub_real['start']):int(sub_real['stop'])]
+        final_fa.append(target_fa)
+           
+
+            
     
 
 ## write temporary file
