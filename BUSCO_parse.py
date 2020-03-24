@@ -15,9 +15,6 @@ import re
 import sys
 
 
-#### set home directory
-#os.chdir('/home/shanedenecke/Dropbox/quick_temp/clean_summary')
-
 def list_to_df(x):
     k=[]
     v=[]
@@ -37,6 +34,7 @@ CLI.add_argument("-file",type=str,help='Summary output file from BUSCO')
 CLI.add_argument("-dir",type=str,help='Directory containing BUSCO outputs')
 args = CLI.parse_args()
 
+args.dir='/home/sdenecke/Transporter_ID/ABC_id/BUSCO/clean_summary'
 
 if args.dir:
     os.chdir(args.dir)
@@ -54,8 +52,9 @@ if args.dir:
         sp_dataframe=list_to_df(values)
         blank=blank.append(sp_dataframe,ignore_index=True)
 
-    blank.columns=['Completeness','Single_copy','Duplicated','Fragmented','Missing','Species']
+    #blank.columns=['Completeness','Single_copy','Duplicated','Fragmented','Missing','Species']
     blank.to_csv(sys.stdout,index=False,sep='\t')
+
 elif args.file:
     i=args.file
     b=os.path.basename(i)
