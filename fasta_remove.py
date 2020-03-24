@@ -23,8 +23,8 @@ if len(sys.argv)>2:
     fa=list(SeqIO.parse(str(sys.argv[1]), 'fasta'))
     rem=[line.rstrip('\n') for line in open(sys.argv[2])]
 #elif len(sys.argv)==2:
-#    fa=list(SeqIO.parse(str(sys.stdin, 'fasta'))
-#    rem=[line.rstrip('\n') for line in open(sys.argv[1])]
+    #fa=list(SeqIO.parse(str(sys.stdin, 'fasta'))
+    #rem=[line.rstrip('\n') for line in open(sys.argv[1])] 
 
 
 clean=[]
