@@ -21,9 +21,10 @@ import sys
 def list_to_df(x):
     k=[]
     v=[]
+    namedict={'C':'Completeness','S':'Single_copy','D':'Duplicated','F':'Fragmented','M':'Missing','Species':'Species'}
     for j in x:
         sublist=j.split(':')
-        k.append(sublist[0])
+        k.append(namedict[sublist[0]])
         v.append([sublist[1]])
     final_data=pd.DataFrame(data=dict(zip(k,v)))
     return(final_data)
