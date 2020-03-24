@@ -46,25 +46,8 @@ def database_find(taxid,data):
 
 ## Set working directory
 #os.path.dirname(os.path.abspath(__file__))
-#os.chdir('/home/shanedenecke/test')
+#os.chdir(home+'/Transporter_ID/ABC_id')
 
-
-
-
-################## ARGUMENT DEBUG
-
-#sys.argv=['','Nezara',['85310_0','7070_0'],'id']
-#if(sys.argv[1]=='Arthropod' or sys.argv[1]=='arthropod'):
-#    odb_node=pd.read_csv('/home/shanedenecke/Applications/custom/OrthoDB/odb10v0_OG2genes.6656.tab',sep='\t',header=None)  
-#if(sys.argv[1]=='Metazoa' or sys.argv[1]=='metazoa'):
-#    odb_node=pd.read_csv('/home/shanedenecke/Applications/custom/OrthoDB/odb10v0_OG2genes.33208.tab',sep='\t',header=None)
-#if(sys.argv[1]=='Nezara' or sys.argv[1]=='nezara'):
-    #odb_node=pd.read_csv('/home/shanedenecke/Applications/custom/OrthoDB/Nezara_node_Arth_new.tsv',sep='\t',header=None)
-#if len(sys.argv[2])==1:
-#    taxid_list=[line.rstrip('\n') for line in open(sys.argv[2][0])]
-#else:
-#    taxid_list=sys.argv[2]
-#arg3=sys.argv[3]
 
 
 ################################################## Read in ARGS
@@ -83,9 +66,9 @@ args = CLI.parse_args()
 
 
 if(args.node=='Arthropod' or args.node=='arthropod'):
-    odb_node=pd.read_csv(home+'/Applications/Custom_Applications/OrthoDB_source/odb10v0_OG2genes.6656.tab',sep='\t',header=None)    
+    odb_node=pd.read_csv(home+'/Applications/OrthoDB_source/odb10v0_OG2genes.6656.tab',sep='\t',header=None)    
 if(args.node=='Metazoa' or args.node=='metazoa'):
-    odb_node=pd.read_csv(home+'/Applications/Custom_Applications/OrthoDB_source/odb10v0_OG2genes.33208.tab',sep='\t',header=None)
+    odb_node=pd.read_csv(home+'/Applications/OrthoDB_source/odb10v0_OG2genes.33208.tab',sep='\t',header=None)
 if len(args.taxid)==1:
     taxid_list=[line.rstrip('\n') for line in open(args.taxid[0])]
 else:
@@ -94,7 +77,7 @@ arg3=args.output
 
 
 ###Key file
-odb_key=pd.read_csv(home+'/Applications/Custom_Applications/OrthoDB_source/odb10v1_gene_xrefs_extended_arth_sub.tab',sep='\t',header=None)
+odb_key=pd.read_csv(home+'/Applications/OrthoDB_source/odb10v1_gene_xrefs_extended_arth_sub.tab',sep='\t',header=None)
 
 
 if len(taxid_list)>3:
@@ -187,12 +170,12 @@ if arg3=='id':
     final.to_csv('temp.tsv',index=False,sep='\t')
     os.system('cat temp.tsv')
 
-print(final.shape[0])
-print(final.shape[0])
+#print(final.shape[0])
+#print(final.shape[0])
 
 
 if arg3=='seq':
-    recs=SeqIO.to_dict(SeqIO.parse(home+'/Applications/Custom_Applications/OrthoDB_source/odb_arthropoda_augment.faa', 'fasta'),key_function=lambda rec: rec.description)
+    recs=SeqIO.to_dict(SeqIO.parse(home+'/Applications/OrthoDB_source/odb_arthropoda_augment.faa', 'fasta'),key_function=lambda rec: rec.description)
     recs2={k:v for (k,v) in recs.items() if re.sub(':.+$','',k) in taxid_list}
     og_list=list(og_genes['odb'])
     fa_sub={k:v for (k,v) in recs2.items() if k in og_list}
