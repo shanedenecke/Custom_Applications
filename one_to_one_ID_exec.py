@@ -3,6 +3,8 @@
 """
 Created on Sat May 18 17:20:39 2019
 
+Script to parse ODB files. Can either find one to one orthologues or one to many.
+
 @author: shanedenecke
 """
 
