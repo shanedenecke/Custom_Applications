@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript  
 shhh <- suppressPackageStartupMessages
 shhh(library(dplyr))
 shhh(library(data.table))
@@ -15,6 +16,11 @@ p <- add_argument(p, "--species", help="file of species names")
 p <- add_argument(p, "--output", help="path to output pdf")
 
 argv=parse_args(p)
+
+#argv$raxtree='/home/shanedenecke/Dropbox/omics_projects/multi_project_transporter_analysis/phylogenies/ABC_phylogenies/raw/RAxML_bipartitions.phylo_ABCA.tre'
+#argv$species='/home/shanedenecke/Dropbox/omics_projects/multi_project_transporter_analysis/phylogenies/ABC_phylogenies/species_list.txt'
+#argv$output='./'
+
 
 rax=argv$raxtree
 unispec=readLines(argv$species)

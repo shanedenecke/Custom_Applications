@@ -1,3 +1,4 @@
+#!/usr/bin/env Rscript 
 shhh <- suppressPackageStartupMessages
 shhh(library(data.table))
 shhh(library(dplyr))

@@ -18,6 +18,9 @@ import pandas as pd
 import statistics as stat
 import sys
 import easygui as eg
+from Bio.Seq import Seq
+from Bio import SeqFeature as sf 
+from Bio.Alphabet import generic_dna
 
 ### Parse arguments
 CLI=argparse.ArgumentParser()
@@ -28,19 +31,25 @@ CLI.add_argument("--mismatch",type=str,default='4',help='Number of maximum misma
 CLI.add_argument("--seed",type=int,default=1,help='Number of maximum seed mismatches')
 CLI.add_argument("--distal",type=int,default=2,help='Number of maximum mismatches')
 CLI.add_argument("--PAM",type=str,default='NGG',help='Number of maximum mismatches')
+CLI.add_argument("--annot",type=str,default='./ABCC2_exon14_wide.gb',help='genbank annotation file')
+CLI.add_argument("--gff",type=str,default='./SpoFru_China.gff',help='GFF file for genome in order to determine off target significance ')
+CLI.add_argument("--output",type=str,default='./',help='Output directory')
+
 
 args = CLI.parse_args()
 ### Import arguments
 #
+#args.target='./target_region.fna'
+#args.genome='./SpoFru_China_genome.fna'
 #
 
 if args.target=='user_input':
-    target_base=list(SeqIO.parse(eg.fileopenbox(title='CHOOSE AN INPUT SEQUENCE FOR TARGETTING',default='/home/shanedenecke/Dropbox/*'),'fasta'))[0]
+    target_base=list(SeqIO.parse(eg.fileopenbox(title='CHOOSE AN INPUT SEQUENCE FOR TARGETTING',default='/home/shanedenecke/Dropbox/quick_temp/CRISPR_targets/*'),'fasta'))[0]
 else: 
     target_base=list(SeqIO.parse(args.target,'fasta'))[0]
 
 if args.genome=='user_input':
-    genome=eg.fileopenbox(title='CHOOSE A GENOME TO CHECK FOR OFF TARGETS',default='/home/shanedenecke/Dropbox/*')
+    genome=eg.fileopenbox(title='CHOOSE A GENOME TO CHECK FOR OFF TARGETS',default='/home/shanedenecke/Dropbox/quick_temp/CRISPR_targets/*')
 else: 
     genome=args.genome
 
@@ -48,6 +57,7 @@ else:
 init=args.init.replace('N','.')
 mismatch=args.mismatch
 pam=20*'N'+args.PAM
+
 
 ## create target search seqeunces
 target_seq=str(target_base.seq)
@@ -95,8 +105,11 @@ pure=raw[raw['mismatch']==0]
 tar_chr=stat.mode(pure['Chr'])
 tar_range=[stat.mean(pure['loc'])-len(target_seq),stat.mean(pure['loc'])+len(target_seq)]
 
-
-
+#### process gff file
+if len(args.gff)>0:
+    gff=pd.read_csv(args.gff,sep='\t',header=None).iloc[:,[0,2,3,4]]
+    gff.columns=['chr','type','start','stop']
+    
 clean=pd.DataFrame()
 for i in range(raw.shape[0]):
     sub=raw.iloc[i,:]
@@ -106,18 +119,67 @@ for i in range(raw.shape[0]):
     d=len([x for x in inds if x<10])
     sed=len([x for x in inds if x>=10])
     seqn=tardir[sub.target_seq]
-    #dist.append(len([x for x in inds if x<10]))
-    #seed.append(len([x for x in inds if x>=10]))
-    #seqnum.append(tardir[sub.target_seq])
     if ((sub['Chr']==tar_chr) & ((sub['loc']>tar_range[0]) & (sub['loc']<tar_range[1]))):
         tar='Good_Target'
     else:
         tar='Off_Target'
-    clean=clean.append(pd.DataFrame({'Distal':[d],'Seed':[sed],'Seq_number':[seqn],'Category':[tar],"uni_id":[sub['uni_id']]}),ignore_index=True)
+    
+    
+    ### attempt to use GFF file (if this exists) to add "target_feature"
+    if len(args.gff)>0:
+        loc=sub['loc']
+        gffsub=gff[(gff.chr==sub['Chr']) & ((gff.start>loc-20000) & (gff.stop<loc+20000))]
+        for j in range(gffsub.shape[0]):
+            if gffsub.iloc[j,:].start < loc & gffsub.iloc[j,:].stop< loc:
+                feature=gffsub.iloc[j,:].type
+            else:
+                feature='intergenic'
+        ## append to overall dataframe for this target
+        clean=clean.append(pd.DataFrame({'Distal':[d],'Seed':[sed],'Seq_number':[seqn],'Category':[tar],
+                                     "uni_id":[sub['uni_id']],"Target_feature":[feature]}),ignore_index=True)
+    else:
+        clean=clean.append(pd.DataFrame({'Distal':[d],'Seed':[sed],'Seq_number':[seqn],'Category':[tar],
+                                     "uni_id":[sub['uni_id']]}),ignore_index=True)
 
+    
+    
+    
 total=pd.merge(clean,raw,on='uni_id').sort_values(['Seq_number','Category'])
 
 filt=total[(total['Distal']<=args.distal) & (total['Seed']<=args.seed)]
+
+
+
+with open(args.annot, "r") as handle:
+    annot=list(SeqIO.parse(handle,'genbank'))[0]
+
+
+annot_frame=filt[filt.Category=='Good_Target']
+for i in range(annot_frame.shape[0]):
+    sub=annot_frame.iloc[i,:]
+    
+    baseseq=Seq(sub.off_target)
+    searchseq=str(baseseq.reverse_complement())+'|'+str(baseseq)    
+    
+    inds=[[m.start(0),m.end(0)] for m in re.finditer(searchseq, str(annot.seq))][0] ## find indexs of matches
+    
+    feat_loc = sf.FeatureLocation(inds[0],inds[1])
+    my_feature = sf.SeqFeature(feat_loc,type='sgRNA',id=sub.Seq_number,strand=1)
+    
+    annot.features.append(my_feature)
+
+
+
+annot.seq.alphabet = generic_dna
+with open(args.output+'sgRNA_genbank_annotation.gb', 'w') as handle:
+    SeqIO.write(annot,handle,'genbank')
+
+
+#### add in ugene featuers???
+#with open(args.output+'sgRNA_genbank_annotation.gb', 'r') as handle:
+#    content = [x.strip() for x in handle.readlines()] 
+    
+    
 #only_perfect=total[(total['Distal']==0) & (total['Seed']==0)]
 os.remove('cas_offtarget_input.txt')
 os.remove('cas_offtarget_rawoutput.txt')
