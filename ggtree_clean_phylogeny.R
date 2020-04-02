@@ -116,6 +116,10 @@ names(unispec)=brewer.pal(length(unispec),'Dark2')
 tip.cols=c()
 for(j in col.tree$tip.label){tip.cols=c(tip.cols,names(unispec)[sapply(unispec,grepl,j)])}
 
+if(length(col.tree$tip.label)!=length(tip.cols)){
+  print('Number of Colors does not much number of tips.\n Is your Species file correct?')
+  stop()
+}
 #xmax=calc.xmax(tbl) * 1.5
 
 ### make plot 
