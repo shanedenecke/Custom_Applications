@@ -12,24 +12,18 @@ library(RColorBrewer)
 
 p=arg_parser('ggtree RAxML clean')
 p <- add_argument(p, "--raxtree", help="path to raxml tree")
-p <- add_argument(p, "--species", help="file of species names")
-p <- add_argument(p, "--output", help="path to output pdf")
+p <- add_argument(p, "--species", help="file of species names. Defaults to automatic detection. 'None' signals that all colors will be black")
+p <- add_argument(p, "--output", help="path to output pdf",default='./')
+p <- add_argument(p, "--branch_collapse", help="bootsrap value to collapse nodes at",default=20)
 
 argv=parse_args(p)
 
-#argv$raxtree='/home/shanedenecke/Dropbox/omics_projects/multi_project_transporter_analysis/phylogenies/ABC_phylogenies/raw/RAxML_bipartitions.phylo_ABCA.tre'
-#argv$species='/home/shanedenecke/Dropbox/omics_projects/multi_project_transporter_analysis/phylogenies/ABC_phylogenies/species_list.txt'
-#argv$output='./'
+# argv$raxtree='/home/shanedenecke/Dropbox/omics_projects/multi_project_transporter_analysis/phylogenies/ABC_phylogenies/raw/RAxML_bipartitions.phylo_ABCA.tre'
 
 
 rax=argv$raxtree
-unispec=readLines(argv$species)
-if(is.na(argv$output)){
-  o='./'
-}else{
-  o=argv$output
-}
-
+o=argv$output
+############### Functions
 calc.xmax=function(x){
   x=tbl 
   tips=tbl[grepl('[A-Z]',label)]$node
@@ -41,7 +35,6 @@ calc.xmax=function(x){
   }
   return(max(bl))
 }
-
 
 
 di2multi4node <- function (phy, tol = 0.5) {
@@ -103,7 +96,7 @@ out.g=base.tree$tip.label[grepl('OUT',base.tree$tip.label)]
 
 base.tree$node.label=as.numeric(base.tree$node.label)
 base.tree$node.label[is.na(base.tree$node.label)]=99.99
-col.tree=di2multi4node(base.tree,20)
+col.tree=di2multi4node(base.tree,as.numeric(argv$branch_collapse))
 col.tree$node.label[col.tree$node.label==99.99]=NA
 
 tbl=as_tibble(col.tree) %>% data.table()
@@ -117,15 +110,32 @@ for(j in as.numeric(col.tree$node.label)){
 }
 
 ## set tip colors based on species
-unispec=c(unispec,out.g)
-names(unispec)=brewer.pal(length(unispec),'Dark2')
-tip.cols=c()
-for(j in col.tree$tip.label){tip.cols=c(tip.cols,names(unispec)[sapply(unispec,grepl,j)])}
-
-if(length(col.tree$tip.label)!=length(tip.cols)){
-  print('Number of Colors does not much number of tips.\n Is your Species file correct?')
-  stop()
-}
+if(is.na(argv$species)){
+  unispec=unique(sapply(col.tree$tip.label,function(x) substr(x,1,6)))
+  unispec=c(unispec,out.g)
+  names(unispec)=brewer.pal(length(unispec),'Dark2')
+  tip.cols=c()
+  for(j in col.tree$tip.label){tip.cols=c(tip.cols,names(unispec)[sapply(unispec,grepl,j)])}
+  if(length(col.tree$tip.label)!=length(tip.cols)){
+    print('Number of Colors does not much number of tips.\n Is your Species file correct?')
+    tip.cols='black'
+  }
+}else if(argv$species=='None'){
+    tip.cols='black'
+}else{
+  unispec=readLines(argv$species)
+  unispec=c(unispec,out.g)
+  names(unispec)=brewer.pal(length(unispec),'Dark2')
+  tip.cols=c()
+  for(j in col.tree$tip.label){tip.cols=c(tip.cols,names(unispec)[sapply(unispec,grepl,j)])}
+  if(length(col.tree$tip.label)!=length(tip.cols)){
+    print('Number of Colors does not much number of tips.\n Is your Species file correct?')
+    tip.cols='black'
+  }
+} 
+  
+edges=col.tree$node.label  
+  
 #xmax=calc.xmax(tbl) * 1.5
 
 ### make plot 
@@ -138,7 +148,7 @@ xmax=layer_scales(gp)$x$range$range[2]*1.3
 h=max(15,length(col.tree$tip.label)/3)
 #w=xmax*7
 w=h*1.5
-if(length(tip.cols)<40){
+if(length(col.tree$tip.label)<40){
   hj=w/20
 }else{
   hj=w/30
@@ -147,4 +157,5 @@ gp=gp+geom_nodelab(hjust=hj,vjust=.3,size=3,fontface='bold',col='black')
 gp=gp+ggtitle(b)
 gp=gp+theme_tree()
 gp=gp+scale_x_continuous(limits=c(0,xmax))
+# print(gp)
 ggsave(paste0(o,b,'.pdf'),plot=gp,device='pdf',height=h,width=w,limitsize = F)
