@@ -194,7 +194,7 @@ if out_type=='seq':
 
 ### write ortho group fastas
     try:
-        shutil.rmtree('./og_sequences'+taxid_names) ### remove directory if already exists
+        shutil.rmtree(args.outdir) ### remove directory if already exists
     except:
         pass
     
