@@ -201,7 +201,10 @@ if out_type=='seq':
     os.mkdir(args.outdir)
     for i in og_groups:
         
-        og_sub=list(og_genes[og_genes['OG']==i]['odb'])[0:args.maxseqs]
+        og_sub=list(og_genes[og_genes['OG']==i]['odb'])
+        og_sub=og_sub[0:min(args.maxseqs,len(og_sub))]
+        
+        
         
         og_fasta={k:v for (k,v) in fa_sub.items() if k in og_sub}
         
