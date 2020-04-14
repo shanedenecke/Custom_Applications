@@ -199,10 +199,11 @@ if out_type=='seq':
         pass
     
     os.mkdir(args.outdir)
+    og_groups=og_groups[0:min(args.maxseqs,len(og_groups))]
     for i in og_groups:
         
         og_sub=list(og_genes[og_genes['OG']==i]['odb'])
-        og_sub=og_sub[0:min(args.maxseqs,len(og_sub))]
+        
         
         
         
