@@ -2,6 +2,24 @@
 ### argument 1 list of taxid codes. for OrthoDB must be file of taxid_0 format. For Orthofinder must be file with 6 letter abbreviations 
 ### argument 2 list of source of orthology. Must be either OrthoDB or Orthofinder. 
 ### argument 3 outpgroups
+
+
+## add help 
+if [ "$1" == "-h" ]; then
+  echo "
+  Welcome ! This shell script is designed to create phyogenetic trees from species. It takes as inputs a list of species (either taxid codes or species names) and outputs a tree.
+  
+  Arguments:
+  
+  -taxid_codes: File path for taxid codes. For OrthoDB must be taxid numbers (e.g. 12345_0). For Orthofinder must be 6 letter species abbreviations
+  -ortho_algo: Algorithm to find 1:1 orthologues. Can be either 'OrthoDB' or 'OrthoFinder'. These have predefined paths on chrysalida to precomputed files/proteoms
+  -outgroups: outgroups used for species tree if any
+  -threads: Self explanatory"
+  exit 0
+fi
+
+
+
 while [ "$#" -gt 0 ]; do
   case "$1" in
     -taxid_codes) taxids="$2"; shift 2;;
@@ -12,15 +30,6 @@ while [ "$#" -gt 0 ]; do
   esac
 done
 
-## add help 
-if [ "$1" == "-h" ]; then
-  echo "
-  -taxid_codes: File path for taxid codes. For OrthoDB must be taxid numbers (e.g. 12345_0). For Orthofinder must be 6 letter species abbreviations
-  -ortho_algo: Algorithm to find 1:1 orthologues. Can be either 'OrthoDB' or 'OrthoFinder'. These have predefined paths on chrysalida to precomputed files/proteoms
-  -outgroups: outgroups used for species tree if any
-  -threads: Self explanatory"
-  exit 0
-fi
 
 #Set up directory tree
 base=$(echo $(basename $taxids))
