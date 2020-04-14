@@ -40,7 +40,7 @@ mkdir $base/one_to_one
 ### output one to one orthologues either from orthoDB or OrthoFinder
 if[ $algo == 'OrthoDB' ]; then
   ~/Applications/Custom_Applications/odb_parse.py -taxid $taxids -output seq --outdir $base/one_to_one --maxseqs 200
-elif[ $algo == 'Orthofinder' ] 
+elif[ $algo == 'Orthofinder' ]; then
   mkdir $base/tempseqs
   mkdir $base/orthofinder_temp ### COULD ADD IN A CONVERSION FROM TAXID TO SPECIES
   cat $taxids | while read i; do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./tempseqs/$i'_unigene.faa'; done 
