@@ -34,7 +34,7 @@ CLI.add_argument("-file",type=str,help='Summary output file from BUSCO')
 CLI.add_argument("-dir",type=str,help='Directory containing BUSCO outputs')
 args = CLI.parse_args()
 
-args.dir='/home/sdenecke/Transporter_ID/ABC_id/BUSCO/clean_summary'
+#args.dir='/home/sdenecke/Transporter_ID/ABC_id/BUSCO/clean_summary'
 
 if args.dir:
     os.chdir(args.dir)
