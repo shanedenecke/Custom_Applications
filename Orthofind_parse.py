@@ -39,11 +39,11 @@ os.makedirs(args.outdir)
 
 
 #### import single copy orthologues
-with open('./Orthogroups/Orthogroups_SingleCopyOrthologues.txt') as f:
+with open(args.inputdir+'/Orthogroups/Orthogroups_SingleCopyOrthologues.txt') as f:
     single_ogs=f.read().splitlines()
     
 ### Import orthogroups
-og_table=pd.read_csv('./Orthogroups/Orthogroups.tsv',sep='\t')
+og_table=pd.read_csv(args.inputdir+'/Orthogroups/Orthogroups.tsv',sep='\t')
 og_table2=og_table[og_table.Orthogroup.isin(single_ogs)]
 all_ids=[]
 
