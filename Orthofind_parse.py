@@ -12,6 +12,7 @@ import os
 import pandas as pd
 from Bio import SeqIO
 import argparse
+import shutil
 
 
 ########## Read in ARGS
@@ -29,6 +30,11 @@ args = CLI.parse_args()
 
 ### create ouput directory
 #os.chdir('/home/shanedenecke/Dropbox/quick_temp/Ofinder_parse')
+try:
+    shutil.rmtree(args.outdir) ### remove directory if already exists 
+except:
+     pass
+
 os.makedirs(args.outdir)
 
 
