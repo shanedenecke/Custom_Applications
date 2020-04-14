@@ -30,7 +30,7 @@ if(length(unique(sapply(files,total_records)))!=1){
 }
 
 for(i in files){
- phy=fread(i,sep=' ',header=F) %>% arrange(V1)
+ phy=fread(i,sep=' ',header=F,skip=1) %>% arrange(V1)
  seq.list[[i]]=phy$V2
  names.list[[i]]=phy$V1
 }
