@@ -38,7 +38,7 @@ mkdir $base/rax_output
 mkdir $base/one_to_one
 
 ### output one to one orthologues either from orthoDB or OrthoFinder
-if[ $algo == 'OrthoDB' ]; then
+if [ $algo == 'OrthoDB' ]; then
   ~/Applications/Custom_Applications/odb_parse.py -taxid $taxids -output seq --outdir $base/one_to_one --maxseqs 200
 elif[ $algo == 'Orthofinder' ]; then
   mkdir $base/tempseqs
