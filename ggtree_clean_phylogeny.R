@@ -111,11 +111,12 @@ for(j in as.numeric(col.tree$node.label)){
 
 ## set tip colors based on species
 if(is.na(argv$species)){
-  unispec=unique(sapply(col.tree$tip.label,function(x) substr(x,1,6)))
+  unispec=unique(sapply(col.tree$tip.label[col.tree$tip.label!=out.g],function(x) substr(x,1,6)))
   unispec=c(unispec,out.g)
   names(unispec)=brewer.pal(length(unispec),'Dark2')
   tip.cols=c()
-  for(j in col.tree$tip.label){tip.cols=c(tip.cols,names(unispec)[sapply(unispec,grepl,j)])}
+  for(j in col.tree$tip.label){
+    tip.cols=c(tip.cols,names(unispec)[sapply(unispec,grepl,j)])}
   if(length(col.tree$tip.label)!=length(tip.cols)){
     print('Number of Colors does not much number of tips.\n Is your Species file correct?')
     tip.cols='black'
