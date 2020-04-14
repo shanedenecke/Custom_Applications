@@ -23,16 +23,16 @@ sys_home = str(Path.home())
 
 ########## Read in ARGS
 CLI=argparse.ArgumentParser()
-CLI.add_argument("-node",type=str,default='Metazoa',help='Choose node to cluster species at. Can be either "Metazoa or Arthropod"')
+CLI.add_argument("-node",type=str,default='Arthropod',help='Choose node to cluster species at. Can be either "Metazoa or Arthropod"')
 CLI.add_argument("-taxid",nargs="*",type=str,default=['7227_0','9606_0','29058_0'],help='put in space separate list of taxid. Should be in the format NUMBER_0. e.g. "7227_0" for Drosophila')
 CLI.add_argument("-output",type=str,default='id',help='Choose the output type. For a table of IDs put "id". For sequences put "seq"')
 CLI.add_argument("--algorithm",type=str,default='oto',help='Choose what parsing algorithm you want to use. oto=one to one; otm=one to many. mtm: many to many"')
-CLI.add_argument("--home",type=str,default=sys_home+'/Applications/Custom_Applications/OrthoDB_source/',help='Choose what parsing algorithm you want to use. oto=one to one; otm=one to many (only can be used in pairwise comparisons"')
+CLI.add_argument("--home",type=str,default=sys_home+'/Applications/Custom_Applications/OrthoDB_source/',help='Choose location of orthodb source files"')
 
 args = CLI.parse_args()
 
 
-#args.algorithm='mtm'
+#args.taxid=['/home/shanedenecke/Dropbox/quick_temp/Ultra_optimize/Hemi_new.txt']
 
 ########## Define Functions
 warnings.filterwarnings("ignore")
@@ -109,7 +109,9 @@ del odb_key_sp
 odb_node[['taxid','gene']]=odb_node[1].str.split(':',expand=True) ### split odb column into taxid and ortho group
 odb_node.columns=['OG','junk','taxid','gene']
 node_tax_subset=odb_node[odb_node['taxid'].isin(taxid_list)]
-ortho_counts=node_tax_subset.groupby('OG')['taxid'].agg({'total_genes':'count','unique_taxids':unicount}) ## aggregate function
+#ortho_counts=node_tax_subset.groupby('OG')['taxid'].agg({'total_genes':'count','unique_taxids':unicount}) ## aggregate function
+ortho_counts=node_tax_subset.groupby('OG')['taxid'].aggregate(['count',unicount]) ## aggregate function
+ortho_counts.columns=['total_genes','unique_taxids']
 del odb_node 
 
 
