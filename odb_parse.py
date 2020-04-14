@@ -28,6 +28,7 @@ CLI.add_argument("-taxid",nargs="*",type=str,default=['7227_0','9606_0','29058_0
 CLI.add_argument("-output",type=str,default='id',help='Choose the output type. For a table of IDs put "id". For sequences put "seq"')
 CLI.add_argument("--algorithm",type=str,default='oto',help='Choose what parsing algorithm you want to use. oto=one to one; otm=one to many. mtm: many to many"')
 CLI.add_argument("--home",type=str,default=sys_home+'/Applications/Custom_Applications/OrthoDB_source/',help='Choose location of orthodb source files"')
+CLI.add_argument("--outdir",type=str,default='./og_sequences',help='set output directory for sequences')
 
 args = CLI.parse_args()
 
@@ -196,13 +197,13 @@ if out_type=='seq':
     except:
         pass
     
-    os.mkdir('./og_sequences'+taxid_names)
+    os.mkdir(args.outdir)
     for i in og_groups:
         
         og_sub=list(og_genes[og_genes['OG']==i]['odb'])
         og_fasta={k:v for (k,v) in fa_sub.items() if k in og_sub}
         
-        with open('./og_sequences'+taxid_names+'/'+str(i)+'.faa', 'w') as fp:
+        with open(args.outdir+'/'+str(i)+'.faa', 'w') as fp:
             for k,v in og_fasta.items():
                 fp.write('>')
                 fp.write(k)
