@@ -7,10 +7,20 @@ while [ "$#" -gt 0 ]; do
     -taxid_codes) taxids="$2"; shift 2;;
     -ortho_algo) algo="$2"; shift 2;;
     -outgroups) outgroups="$2"; shift 2;;
-    -output_directory) output_directory="$2"; shift 2;;
+    #-output_directory) output_directory="$2"; shift 2;;
     -threads) THREADS="$2"; shift 2;;
   esac
 done
+
+## add help 
+if [ "$1" == "-h" ]; then
+  echo "
+  -taxid_codes: File path for taxid codes. For OrthoDB must be taxid numbers (e.g. 12345_0). For Orthofinder must be 6 letter species abbreviations
+  -ortho_algo: Algorithm to find 1:1 orthologues. Can be either 'OrthoDB' or 'OrthoFinder'. These have predefined paths on chrysalida to precomputed files/proteoms
+  -outgroups: outgroups used for species tree if any
+  -threads: Self explanatory"
+  exit 0
+fi
 
 #Set up directory tree
 base=$(echo $(basename $taxids))
