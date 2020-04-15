@@ -59,9 +59,11 @@ if os.path.isdir(args.total_fasta):
     recs_reduce=[]
     filenames = [args.total_fasta+'/'+x for x in os.listdir(args.total_fasta) if '.fa' in x]
     for x in filenames:
+        species=os.path.basename(x).replace('_unigene.faa','')
         proteome=list(SeqIO.parse(x,'fasta'))
         for seq in proteome:
             if seq.id in flat_ids: 
+                seq.description=species
                 recs_reduce.append(seq)
 else:
     recs=SeqIO.parse(args.total_fasta,'fasta')
@@ -75,5 +77,7 @@ for group in single_ogs:
     minus_og=row.drop('Orthogroup',axis=1)
     idlist=list(minus_og.iloc[0])
     seqlist=[x for x in recs_reduce if x.id in idlist]
+    for i in range(0,len(seqlist)):
+        seqlist[i].id=seqlist[i].description
     
     SeqIO.write(seqlist,args.outdir+'/'+og+'.faa','fasta')

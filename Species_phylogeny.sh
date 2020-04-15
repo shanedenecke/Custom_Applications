@@ -2,7 +2,7 @@
 ### argument 1 list of taxid codes. for OrthoDB must be file of taxid_0 format. For Orthofinder must be file with 6 letter abbreviations 
 ### argument 2 list of source of orthology. Must be either OrthoDB or Orthofinder. 
 ### argument 3 outpgroups
-
+#Species_phylogeny.sh -taxid_codes Hemispec.txt -ortho_algo Orthofinder -outgroups 7227_0 -threads 10
 
 ## add help 
 if [ "$1" == "-h" ]; then
