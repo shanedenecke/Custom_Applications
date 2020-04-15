@@ -51,8 +51,8 @@ elif [ $algo == 'Orthofinder' ]; then
   mkdir $base/tempseqs
   grep -f $taxids ~/Applications/Custom_Applications/OrthoDB_source/taxid_sp_convert.tsv | cut -f 2 | while read i;do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./$base/tempseqs/$i'_unigene.faa'; done ### copy proteome files 
   ~/Applications/OrthoFinder/orthofinder -og -f $base/tempseqs -o $base/orthofinder_temp
-  cat $base/tempseqs/*.faa > $base/tempseqs/total_proteome.faa ### create master proteome 
-  python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -inputdir $base/orthofinder_temp -total_fasta $base/tempseqs/total_proteome.faa
+  #cat $base/tempseqs/*.faa > $base/tempseqs/total_proteome.faa ### create master proteome 
+  python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -inputdir $base/orthofinder_temp -total_fasta $base/tempseqs/ -maxseqs 200
 fi
 
 ### perform alignments for all one to ones 

@@ -21,7 +21,7 @@ import shutil
 ########## Read in ARGS
 CLI=argparse.ArgumentParser()
 CLI.add_argument("-outdir",type=str,default='./Hemispec/one_to_one',help='Choose directory for 1:1 orthologue sequences')
-CLI.add_argument("-inputdir",type=str,default='./Hemispec/',help='Output directory from Orhtofinder. Normal filetree')
+CLI.add_argument("-inputdir",type=str,default='./Hemispec/orthofinder_temp',help='Output directory from Orhtofinder. Normal filetree')
 CLI.add_argument("-total_fasta",type=str,default='./Hemispec/tempseqs/total_proteome.faa',help='All possible fasta sequences from the analysis in a single file')
 CLI.add_argument("-maxseqs",type=int,default=1000000000,help='maximum number of sequences to retrieve')
 
@@ -29,14 +29,14 @@ args = CLI.parse_args()
 
 
 ### create ouput directory
-#os.chdir('')
+#os.chdir('/home/shanedenecke/Dropbox/test')
 try:
     shutil.rmtree(args.outdir) ### remove directory if already exists 
 except:
      pass
 
 os.makedirs(args.outdir)
-os.system('cp '+args.inputdir+'/*/ '+args.inputdir+'/') ### extract contents
+os.system('cp -r '+args.inputdir+'/*/Orthogroups '+args.inputdir+'/') ### extract contents
 
 
 
@@ -56,17 +56,13 @@ flat_ids=[item for sublist in all_ids for item in sublist]
 
 ###Concatonate fasta files if needed. Otherwise just import file
 if os.path.isdir(args.total_fasta):
-    recs=[]
-    filenames = [x for x in os.listdir(args.total_fasta) if '.fa' in x]
-    for i in filenames:
-        seqIO.parse(i,'fasta')
-    
-    
-    with open(args.total_fasta+'/TOTAL_FASTA.faa', 'w') as outfile:
-        for fname in filenames:
-            with open(fname) as infile:
-                for line in infile:
-                   outfile.write(line)
+    recs_reduce=[]
+    filenames = [args.total_fasta+'/'+x for x in os.listdir(args.total_fasta) if '.fa' in x]
+    for x in filenames:
+        proteome=list(SeqIO.parse(x,'fasta'))
+        for seq in proteome:
+            if seq.id in flat_ids: 
+                recs_reduce.append(seq)
 else:
     recs=SeqIO.parse(args.total_fasta,'fasta')
     recs_reduce=[x for x in recs if x.id in flat_ids]
