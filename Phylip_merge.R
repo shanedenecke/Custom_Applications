@@ -25,7 +25,6 @@ files=files[total_records(files)>1] %>% na.omit() %>% as.character()
 
 #### catch error
 if(length(unique(sapply(files,total_records)))!=1){
-  print('All sequences not 1:1 orthologues !!!!!!!!!!!. Some sequences removed')
   rec.counts=sapply(files,total_records)
   numspec=max(rec.counts)
   files=names(rec.counts)[rec.counts==numspec]
