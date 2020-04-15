@@ -1,13 +1,13 @@
-#!/usr/bin/env Rscript  
-shhh <- suppressPackageStartupMessages
-shhh(library(dplyr))
-shhh(library(data.table))
-shhh(library(ape))
-shhh(library(ggtree))
-shhh(library(ggplot2))
-shhh(library(treeio))
-shhh(library(argparser))
-library(RColorBrewer)
+  #!/usr/bin/env Rscript  
+  shhh <- suppressPackageStartupMessages
+  shhh(library(dplyr))
+  shhh(library(data.table))
+  shhh(library(ape))
+  shhh(library(ggtree))
+  shhh(library(ggplot2))
+  shhh(library(treeio))
+  shhh(library(argparser))
+  library(RColorBrewer)
 
 
 p=arg_parser('ggtree RAxML clean')
@@ -111,8 +111,9 @@ for(j in as.numeric(col.tree$node.label)){
 
 ## set tip colors based on species
 if(is.na(argv$species)){
-  unispec=unique(sapply(col.tree$tip.label[col.tree$tip.label!=out.g],function(x) substr(x,1,6)))
-  unispec=c(unispec,out.g)
+  #unispec=unique(sapply(col.tree$tip.label[col.tree$tip.label!=out.g],function(x) substr(x,1,6)))
+  #unispec=c(unispec,out.g)
+  unispec=unique(sapply(col.tree$tip.label,function(x) substr(x,1,6)))
   names(unispec)=brewer.pal(length(unispec),'Dark2')
   tip.cols=c()
   for(j in col.tree$tip.label){
