@@ -42,11 +42,13 @@ if [ $algo == 'OrthoDB' ]; then
   ~/Applications/Custom_Applications/odb_parse.py -taxid $taxids -output seq --outdir $base/one_to_one --maxseqs 200
 elif [ $algo == 'Orthofinder' ]; then
   mkdir $base/tempseqs
-  mkdir $base/orthofinder_temp ### COULD ADD IN A CONVERSION FROM TAXID TO SPECIES
-  cat $taxids | while read i; do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./tempseqs/$i'_unigene.faa'; done 
-  ~/Applications/Orthofinder/orthofinder -f tempseqs -o orthofinder_temp
-  cat tempseqs/*.faa > tempseqs/total_proteome.faa
-  python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -inputdir orthofinder_temp -total_fasta tempseqs/total_proteome.faa
+  #mkdir $base/orthofinder_temp 
+  grep -f $taxids ~/Applications/Custom_Applications/OrthoDB_source/taxid_sp_convert.tsv | cut -f 2 > $base/orthofinder_temp/ofinder_species.txt
+  cat $base/orthofinder_temp/ofinder_species.txt | while read i; do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./$base/tempseqs/$i'_unigene.faa'; done 
+  ~/Applications/OrthoFinder/orthofinder -og -f $base/tempseqs -o $base/orthofinder_temp
+  mv $base/orthofinder_temp/*/* $base/orthofinder_temp/ ### extract contents
+  cat $base/tempseqs/*.faa > $base/tempseqs/total_proteome.faa
+  python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -inputdir $base/orthofinder_temp -total_fasta $base/tempseqs/total_proteome.faa
 fi
 
 ### perform alignments for all one to ones 
