@@ -31,6 +31,11 @@ while [ "$#" -gt 0 ]; do
 done
 
 
+taxids='Hemispec.txt'
+ortho_algo='Orthofinder'
+outgrpuos='None'
+THREADS=10
+
 #Set up directory tree
 base=$(echo $(basename $taxids | cut -f 1 -d '.'))
 mkdir $base
@@ -39,15 +44,14 @@ mkdir $base/one_to_one
 
 ### output one to one orthologues either from orthoDB or OrthoFinder
 if [ $algo == 'OrthoDB' ]; then
+  echo 'Starting OrthoDB search'
   ~/Applications/Custom_Applications/odb_parse.py -taxid $taxids -output seq --outdir $base/one_to_one --maxseqs 200
 elif [ $algo == 'Orthofinder' ]; then
+  echo 'Starting Orthofinder search'
   mkdir $base/tempseqs
-  #mkdir $base/orthofinder_temp 
-  grep -f $taxids ~/Applications/Custom_Applications/OrthoDB_source/taxid_sp_convert.tsv | cut -f 2 > $base/orthofinder_temp/ofinder_species.txt
-  cat $base/orthofinder_temp/ofinder_species.txt | while read i; do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./$base/tempseqs/$i'_unigene.faa'; done 
+  grep -f $taxids ~/Applications/Custom_Applications/OrthoDB_source/taxid_sp_convert.tsv | cut -f 2 | while read i;do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./$base/tempseqs/$i'_unigene.faa'; done ### copy proteome files 
   ~/Applications/OrthoFinder/orthofinder -og -f $base/tempseqs -o $base/orthofinder_temp
-  mv $base/orthofinder_temp/*/* $base/orthofinder_temp/ ### extract contents
-  cat $base/tempseqs/*.faa > $base/tempseqs/total_proteome.faa
+  cat $base/tempseqs/*.faa > $base/tempseqs/total_proteome.faa ### create master proteome 
   python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -inputdir $base/orthofinder_temp -total_fasta $base/tempseqs/total_proteome.faa
 fi
 
