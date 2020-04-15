@@ -5,6 +5,9 @@ Created on Mon Apr 13 20:13:49 2020
 
 OrthoFind Output parse 
 
+################### Error at line 57 on server. Also need to add in some lines at the beginning to arrange output in more general format (avoid date folder)
+
+
 @author: shanedenecke
 """
 
@@ -36,7 +39,6 @@ except:
      pass
 
 os.makedirs(args.outdir)
-
 
 #### import single copy orthologues
 with open(args.inputdir+'/Orthogroups/Orthogroups_SingleCopyOrthologues.txt') as f:
