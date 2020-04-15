@@ -68,8 +68,10 @@ sed -i 's/J/A/g' $base/one_to_one'/Full_species.phy'
 sed -i 's/\./A/g' $base/one_to_one'/Full_species.phy'
 
 ### Perform RaxML tree
-if [ $outgroups == 'None|none' ]; then
-  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath Hemispec/rax_output/) -o $outgroups
+if echo $outgroups | grep -q "None|none" ; then
+  echo "Running without outgroups"
+  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath $base/rax_output/)
 else
-  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath Hemispec/rax_output/)
+  echo "Running with outgroups"
+  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath $base/rax_output/) -o $outgroups 
 fi
