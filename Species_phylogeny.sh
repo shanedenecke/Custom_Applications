@@ -31,10 +31,10 @@ while [ "$#" -gt 0 ]; do
 done
 
 
-taxids='Hemispec.txt'
-ortho_algo='Orthofinder'
-outgrpuos='None'
-THREADS=10
+#taxids='Hemispec.txt'
+#ortho_algo='Orthofinder'
+#outgrpuos='None'
+#THREADS=10
 
 #Set up directory tree
 base=$(echo $(basename $taxids | cut -f 1 -d '.'))
