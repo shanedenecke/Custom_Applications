@@ -28,7 +28,7 @@ if(length(unique(sapply(files,total_records)))!=1){
   print('All sequences not 1:1 orthologues !!!!!!!!!!!. Some sequences removed')
   rec.counts=sapply(files,total_records)
   numspec=max(rec.counts)
-  files=rec.counts[rec.counts==numspec] 
+  files=names(rec.counts)[rec.counts==numspec]
 }
 
 for(i in files){
