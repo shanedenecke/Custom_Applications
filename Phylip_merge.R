@@ -26,7 +26,8 @@ files=files[total_records(files)>1] %>% na.omit() %>% as.character()
 #### catch error
 if(length(unique(sapply(files,total_records)))!=1){
   rec.counts=sapply(files,total_records)
-  numspec=max(rec.counts)
+  tab=table(rec.counts)
+  numspec=as.numeric(names(tab)[tab==max(tab)])
   files=names(rec.counts)[rec.counts==numspec]
 }
 
