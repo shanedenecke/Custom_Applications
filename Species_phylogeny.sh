@@ -47,13 +47,17 @@ if [ $algo == 'OrthoDB' ]; then
   echo 'Starting OrthoDB search'
   ~/Applications/Custom_Applications/odb_parse.py -taxid $taxids -output seq --outdir $base/one_to_one --maxseqs 200
 elif [ $algo == 'Orthofinder' ]; then
-  echo 'Starting Orthofinder search'
-  mkdir $base/tempseqs
-  grep -f $taxids ~/Applications/Custom_Applications/OrthoDB_source/taxid_sp_convert.tsv | cut -f 2 | while read i;do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./$base/tempseqs/$i'_unigene.faa'; done ### copy proteome files 
-  ~/Applications/OrthoFinder/orthofinder -og -f $base/tempseqs -o $base/orthofinder_temp
-  #cat $base/tempseqs/*.faa > $base/tempseqs/total_proteome.faa ### create master proteome 
-  python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -inputdir $base/orthofinder_temp -total_fasta $base/tempseqs/ -maxseqs 200
-fi
+    echo 'Starting Orthofinder search'
+    mkdir $base/tempseqs
+    grep -f $taxids ~/Applications/Custom_Applications/OrthoDB_source/taxid_sp_convert.tsv | cut -f 2 | while read i;do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./$base/tempseqs/$i'_unigene.faa'; done ### copy proteome files
+    for i in ./$base/tempseqs/*; do 
+      sed -i 's/J/A/g' $i
+      sed -i 's/\./A/g' $i
+    done
+    ~/Applications/OrthoFinder/orthofinder -og -f $base/tempseqs -o $base/orthofinder_temp
+    #cat $base/tempseqs/*.faa > $base/tempseqs/total_proteome.faa ### create master proteome 
+    python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -inputdir $base/orthofinder_temp -total_fasta $base/tempseqs/ -maxseqs 200
+  fi
 
 ### perform alignments for all one to ones 
 for x in  $base/one_to_one/*.faa
@@ -68,10 +72,10 @@ sed -i 's/J/A/g' $base/one_to_one'/Full_species.phy'
 sed -i 's/\./A/g' $base/one_to_one'/Full_species.phy'
 
 ### Perform RaxML tree
-if echo $outgroups | grep -q "None|none" ; then
+  if echo $outgroups | grep -Eq "None|none" ; then
   echo "Running without outgroups"
   ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath $base/rax_output/)
 else
   echo "Running with outgroups"
-  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath $base/rax_output/) -o $outgroups 
+    ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath $base/rax_output/) -o $outgroups 
 fi
