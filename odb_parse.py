@@ -24,12 +24,16 @@ sys_home = str(Path.home())
 ########## Read in ARGS
 CLI=argparse.ArgumentParser()
 CLI.add_argument("-node",type=str,default='Arthropod',help='Choose node to cluster species at. Can be either "Metazoa or Arthropod"')
-CLI.add_argument("-taxid",nargs="*",type=str,default=['7227_0','9606_0','29058_0'],help='put in space separate list of taxid. Should be in the format NUMBER_0. e.g. "7227_0" for Drosophila')
+CLI.add_argument("-taxid",nargs="*",type=str,default=['7227_0','29058_0'],help='put in space separate list of taxid. Should be in the format NUMBER_0. e.g. "7227_0" for Drosophila')
 CLI.add_argument("-output",type=str,default='id',help='Choose the output type. For a table of IDs put "id". For sequences put "seq"')
 CLI.add_argument("--algorithm",type=str,default='oto',help='Choose what parsing algorithm you want to use. oto=one to one; otm=one to many. mtm: many to many"')
 CLI.add_argument("--home",type=str,default=sys_home+'/Applications/Custom_Applications/OrthoDB_source/',help='Choose location of orthodb source files"')
 CLI.add_argument("--outdir",type=str,default='./og_sequences',help='set output directory for sequences')
 CLI.add_argument("--maxseqs",type=int,default=1000000000,help='maximum number of sequences to retrieve')
+CLI.add_argument("--taxid_dict",type=str,default=sys_home+'/Applications/Custom_Applications/OrthoDB_source/taxid_sp_convert.tsv',help='key to convert taxids into 6 letter or species names')
+CLI.add_argument("--naming_output",type=str,default='Abbreviation',help='How do you want your species to be named? Can be "Abbreviation" which gives 6 letter species code. "Taxid" which gives ncbi taxid numbers. "Full_name" which gives full_species name"')
+
+
 
 args = CLI.parse_args()
 
@@ -74,7 +78,6 @@ if len(args.taxid)==1:
     taxid_list=[line.rstrip('\n') for line in open(args.taxid[0])]
 else:
     taxid_list=args.taxid
-
 
 
 
@@ -148,7 +151,18 @@ elif algo=='mtm':
     del node_tax_subset
 
 
-
+### rename acoridng to naming dictionary
+    #### Import naming dictionary for outputting taxids, abbrevations, or full names
+naming_table=pd.read_csv(args.taxid_dict,sep='\t',header=None)
+if args.naming_output=='Abbreviation':
+    name_dict=dict(zip(list(naming_table.iloc[:,0]),list(naming_table.iloc[:,1])))
+elif args.naming_output=='Taxid':
+    name_dict=dict(zip(list(naming_table.iloc[:,0]),list(naming_table.iloc[:,0])))
+elif args.naming_output=='Full_name':
+    name_dict=dict(zip(list(naming_table.iloc[:,0]),list(naming_table.iloc[:,2])))
+    
+newnames=[name_dict[x] for x in og_genes.taxid]
+og_genes.taxid=newnames
 
 ########### Give Output
 
@@ -202,12 +216,12 @@ if out_type=='seq':
     og_groups=og_groups[0:min(args.maxseqs,len(og_groups))]
     for i in og_groups:
         
-        og_sub=list(og_genes[og_genes['OG']==i]['odb'])
+        og_sub=og_genes[og_genes['OG']==i][['odb','taxid']]
         
-        
-        
-        
-        og_fasta={k:v for (k,v) in fa_sub.items() if k in og_sub}
+        og_fasta={k:v for (k,v) in fa_sub.items() if k in list(og_sub.odb)}
+        for j in list(og_fasta.keys()):
+            newkey=og_sub[og_sub.odb==j].loc[:,'taxid'].values[0]
+            og_fasta[newkey] = og_fasta.pop(j)
         
         with open(args.outdir+'/'+str(i)+'.faa', 'w') as fp:
             for k,v in og_fasta.items():
