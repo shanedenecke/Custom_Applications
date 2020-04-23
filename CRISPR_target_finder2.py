@@ -31,8 +31,8 @@ CLI.add_argument("--mismatch",type=str,default='4',help='Number of maximum misma
 CLI.add_argument("--seed",type=int,default=1,help='Number of maximum seed mismatches')
 CLI.add_argument("--distal",type=int,default=2,help='Number of maximum mismatches')
 CLI.add_argument("--PAM",type=str,default='NGG',help='Number of maximum mismatches')
-CLI.add_argument("--annot",type=str,default='./ABCC2_exon14_wide.gb',help='genbank annotation file')
-CLI.add_argument("--gff",type=str,default='./SpoFru_China.gff',help='GFF file for genome in order to determine off target significance ')
+CLI.add_argument("--annot",type=str,help='genbank annotation file')
+CLI.add_argument("--gff",type=str,help='GFF file for genome in order to determine off target significance ')
 CLI.add_argument("--output",type=str,default='./',help='Output directory')
 
 
@@ -106,7 +106,7 @@ tar_chr=stat.mode(pure['Chr'])
 tar_range=[stat.mean(pure['loc'])-len(target_seq),stat.mean(pure['loc'])+len(target_seq)]
 
 #### process gff file
-if len(args.gff)>0:
+if args.gff is not None:
     gff=pd.read_csv(args.gff,sep='\t',header=None).iloc[:,[0,2,3,4]]
     gff.columns=['chr','type','start','stop']
     
@@ -126,7 +126,7 @@ for i in range(raw.shape[0]):
     
     
     ### attempt to use GFF file (if this exists) to add "target_feature"
-    if len(args.gff)>0:
+    if args.gff is not None:
         loc=sub['loc']
         gffsub=gff[(gff.chr==sub['Chr']) & ((gff.start>loc-20000) & (gff.stop<loc+20000))]
         for j in range(gffsub.shape[0]):
@@ -149,30 +149,30 @@ total=pd.merge(clean,raw,on='uni_id').sort_values(['Seq_number','Category'])
 filt=total[(total['Distal']<=args.distal) & (total['Seed']<=args.seed)]
 
 
-
-with open(args.annot, "r") as handle:
-    annot=list(SeqIO.parse(handle,'genbank'))[0]
-
-
-annot_frame=filt[filt.Category=='Good_Target']
-for i in range(annot_frame.shape[0]):
-    sub=annot_frame.iloc[i,:]
+if args.annot is not None:
+    with open(args.annot, "r") as handle:
+        annot=list(SeqIO.parse(handle,'genbank'))[0]
     
-    baseseq=Seq(sub.off_target)
-    searchseq=str(baseseq.reverse_complement())+'|'+str(baseseq)    
     
-    inds=[[m.start(0),m.end(0)] for m in re.finditer(searchseq, str(annot.seq))][0] ## find indexs of matches
+    annot_frame=filt[filt.Category=='Good_Target']
+    for i in range(annot_frame.shape[0]):
+        sub=annot_frame.iloc[i,:]
+        
+        baseseq=Seq(sub.off_target)
+        searchseq=str(baseseq.reverse_complement())+'|'+str(baseseq)    
+        
+        inds=[[m.start(0),m.end(0)] for m in re.finditer(searchseq, str(annot.seq))][0] ## find indexs of matches
+        
+        feat_loc = sf.FeatureLocation(inds[0],inds[1])
+        my_feature = sf.SeqFeature(feat_loc,type='sgRNA',id=sub.Seq_number,strand=1)
+        
+        annot.features.append(my_feature)
     
-    feat_loc = sf.FeatureLocation(inds[0],inds[1])
-    my_feature = sf.SeqFeature(feat_loc,type='sgRNA',id=sub.Seq_number,strand=1)
     
-    annot.features.append(my_feature)
-
-
-
-annot.seq.alphabet = generic_dna
-with open(args.output+'sgRNA_genbank_annotation.gb', 'w') as handle:
-    SeqIO.write(annot,handle,'genbank')
+    
+    annot.seq.alphabet = generic_dna
+    with open(args.output+'sgRNA_genbank_annotation.gb', 'w') as handle:
+        SeqIO.write(annot,handle,'genbank')
 
 
 #### add in ugene featuers???
@@ -181,8 +181,8 @@ with open(args.output+'sgRNA_genbank_annotation.gb', 'w') as handle:
     
     
 #only_perfect=total[(total['Distal']==0) & (total['Seed']==0)]
-os.remove('cas_offtarget_input.txt')
-os.remove('cas_offtarget_rawoutput.txt')
+#os.remove('cas_offtarget_input.txt')
+#os.remove('cas_offtarget_rawoutput.txt')
 
 filt.to_csv(sys.stdout,header=True,index=False,sep='\t')
 
