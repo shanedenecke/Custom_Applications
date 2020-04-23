@@ -41,6 +41,7 @@ with subprocess.Popen(['blastp','-query',args.start_organism,'-db',args.target_o
         blast_out=pd.read_csv(proc.stdout,sep='\t',header=None)
        
 
+blast_out.to_csv('Blast_output.csv')
 ### Filter blast and target _proteome
 uniblast=blast_out.drop_duplicates(subset=0,keep='first')
 start_ids=[x.id for x in start_proteome]
