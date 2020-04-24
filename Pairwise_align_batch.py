@@ -11,7 +11,9 @@ from Bio import pairwise2
 import os
 import subprocess 
 import pandas as pd
-from Bio.SubsMat.MatrixInfo import blosum62
+#from Bio.SubsMat.MatrixInfo import blosum62
+#from Bio.SubsMat.MatrixInfo import mclach
+from Bio.SubsMat.MatrixInfo import levin
 import argparse
 
 
@@ -42,6 +44,7 @@ with subprocess.Popen(['blastp','-query',args.start_organism,'-db',args.target_o
        
 
 blast_out.to_csv('Blast_output.csv')
+#blast_out=pd.read_csv('Blastout.csv',header=None)
 ### Filter blast and target _proteome
 uniblast=blast_out.drop_duplicates(subset=0,keep='first')
 start_ids=[x.id for x in start_proteome]
@@ -52,12 +55,19 @@ d={}
 for i in start_ids:
     if i not in list(uniblast.iloc[:,0]):
         d.update({i:'No Match'})
+        pass
     else:
         row=uniblast[uniblast[0]==i]
         target_seq=[str(x.seq) for x in target_proteome_lean if x.id==row.iloc[:,1].values[0]][0]
         start_seq=[str(x.seq) for x in start_proteome if x.id==i][0]
-        alscore = pairwise2.align.globaldx(target_seq, start_seq, blosum62,score_only=True)
-        corrected=alscore/(len(start_seq)*.05)
+        #alscore = pairwise2.align.globaldx(target_seq, start_seq, blosum62,score_only=True)
+        align = pairwise2.align.globaldx(target_seq, start_seq, levin)
+        score=align[-1][-3]
+        l=align[-1][-1]*2
+        
+        #alscore=pairwise2.align.globalxx(target_seq, start_seq,score_only=True)/len(target_seq)
+        #corrected=alscore/(len(start_seq)*2)
+        corrected=score/l
         d.update({i:corrected})
 
 
