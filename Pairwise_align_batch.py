@@ -39,11 +39,11 @@ target_proteome=list(SeqIO.parse(args.target_organism,format='fasta'))
 
 ### Run blast
 with subprocess.Popen(['blastp','-query',args.start_organism,'-db',args.target_organism,
-                           '-outfmt','6 qseqid sseqid evalue qcovs','-num_threads',args.threads],stdout=subprocess.PIPE) as proc:
+                           '-outfmt','6 qseqid sseqid evalue qcovs pident','-num_threads',args.threads],stdout=subprocess.PIPE) as proc:
         blast_out=pd.read_csv(proc.stdout,sep='\t',header=None)
        
 
-blast_out.to_csv('Blast_output.csv')
+blast_out.to_csv('Blast_output.csv',index=False)
 #blast_out=pd.read_csv('Blastout.csv',header=None)
 ### Filter blast and target _proteome
 uniblast=blast_out.drop_duplicates(subset=0,keep='first')
@@ -52,7 +52,7 @@ target_proteome_lean=[x for x in target_proteome if x.id in list(uniblast.iloc[:
 
 
 d={}
-for i in start_ids:
+for i in start_ids[0:500]:
     if i not in list(uniblast.iloc[:,0]):
         d.update({i:'No Match'})
         pass
@@ -61,9 +61,9 @@ for i in start_ids:
         target_seq=[str(x.seq) for x in target_proteome_lean if x.id==row.iloc[:,1].values[0]][0]
         start_seq=[str(x.seq) for x in start_proteome if x.id==i][0]
         #alscore = pairwise2.align.globaldx(target_seq, start_seq, blosum62,score_only=True)
-        align = pairwise2.align.globaldx(target_seq, start_seq, levin)
+        align = pairwise2.align.globalxx(target_seq, start_seq)
         score=align[-1][-3]
-        l=align[-1][-1]*2
+        l=align[-1][-1]
         
         #alscore=pairwise2.align.globalxx(target_seq, start_seq,score_only=True)/len(target_seq)
         #corrected=alscore/(len(start_seq)*2)
@@ -74,4 +74,4 @@ for i in start_ids:
 final_out=pd.DataFrame(list(d.items()))
 final_out.columns=['Gene_id','Identity_score'] 
 final_out.to_csv(args.output,sep='\t',index=False)
-os.system('cat '+args.output)
+#os.system('cat '+args.output)
