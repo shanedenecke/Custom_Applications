@@ -17,6 +17,7 @@ from Bio import SeqIO
 import gc 
 import shutil 
 from pathlib import Path
+import re 
 
 sys_home = str(Path.home())
 
@@ -70,6 +71,10 @@ home=args.home
 out_type=args.output
 algo=args.algorithm
 
+
+
+
+### parse args further
 if(args.node=='Arthropod' or args.node=='arthropod'):
     odb_node=pd.read_csv(home+'odb10v0_OG2genes.6656.tab',sep='\t',header=None)    
 if(args.node=='Metazoa' or args.node=='metazoa'):
@@ -79,6 +84,19 @@ if len(args.taxid)==1:
 else:
     taxid_list=args.taxid
 
+### convert args.taxid into NCBI taxids
+#taxid_list=['DroMel','HelArm','HalHal']
+#taxid_list=['Drosophila melanogaster','Helicoverpa armigera','Halyomorpha halys']
+naming_table=pd.read_csv(args.taxid_dict,sep='\t',header=None)
+if re.search('[0-9]',taxid_list[0]):
+    pass
+elif re.search('^[A-z]{6}$',taxid_list[0]): 
+    for i in range(len(taxid_list)):
+        taxid_list[i]=naming_table[naming_table.iloc[:,1]==taxid_list[i]].iloc[0,0]
+else:
+    taxid_list=[x.replace(' ','_') for x in taxid_list]
+    for i in range(len(taxid_list)):
+        taxid_list[i]=naming_table[naming_table.iloc[:,2]==taxid_list[i]].iloc[0,0]
 
 
 ########### Import and clean Key data
@@ -153,7 +171,7 @@ elif algo=='mtm':
 
 ### rename acoridng to naming dictionary
     #### Import naming dictionary for outputting taxids, abbrevations, or full names
-naming_table=pd.read_csv(args.taxid_dict,sep='\t',header=None)
+
 if args.naming_output=='Abbreviation':
     name_dict=dict(zip(list(naming_table.iloc[:,0]),list(naming_table.iloc[:,1])))
 elif args.naming_output=='Taxid':
