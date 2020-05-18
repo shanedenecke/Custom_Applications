@@ -52,7 +52,7 @@ target_proteome_lean=[x for x in target_proteome if x.id in list(uniblast.iloc[:
 
 
 d={}
-for i in start_ids[0:500]:
+for i in start_ids:
     if i not in list(uniblast.iloc[:,0]):
         d.update({i:'No Match'})
         pass
