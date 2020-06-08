@@ -21,9 +21,10 @@ import shutil
 ########## Read in ARGS
 CLI=argparse.ArgumentParser()
 CLI.add_argument("-outdir",type=str,default='./Hemispec/one_to_one',help='Choose directory for 1:1 orthologue sequences')
-CLI.add_argument("-inputdir",type=str,default='./Hemispec/orthofinder_temp',help='Output directory from Orhtofinder. Normal filetree')
+CLI.add_argument("-indir",type=str,default='./Hemispec/orthofinder_temp',help='Output directory from Orhtofinder. Top level of Orthofinder outpu')
 CLI.add_argument("-total_fasta",type=str,default='./Hemispec/tempseqs/total_proteome.faa',help='All possible fasta sequences from the analysis in a single file')
 CLI.add_argument("-maxseqs",type=int,default=1000000000,help='maximum number of sequences to retrieve')
+CLI.add_argument("-mode",type=str,default='id',help='Either seq or id. Do you want seqeunces to be returned or a table with IDs?')
 
 args = CLI.parse_args()
 
@@ -36,48 +37,56 @@ except:
      pass
 
 os.makedirs(args.outdir)
-os.system('cp -r '+args.inputdir+'/*/Orthogroups '+args.inputdir+'/') ### extract contents
+os.system('cp -r '+args.indir+'/*/Orthogroups '+args.indir+'/') ### extract contents
 
 
 
 #### import single copy orthologues
-with open(args.inputdir+'/Orthogroups/Orthogroups_SingleCopyOrthologues.txt') as f:
+with open(args.indir+'/Orthogroups/Orthogroups_SingleCopyOrthologues.txt') as f:
     single_ogs=f.read().splitlines()
     
 ### Import orthogroups
-og_table=pd.read_csv(args.inputdir+'/Orthogroups/Orthogroups.tsv',sep='\t')
+og_table=pd.read_csv(args.indir+'/Orthogroups/Orthogroups.tsv',sep='\t')
 og_table2=og_table[og_table.Orthogroup.isin(single_ogs)]
 all_ids=[]
 
-#### get subset of all IDs to speed up process
-for i in og_table2.columns:
-    all_ids.append(list(og_table2.loc[:,i]))
-flat_ids=[item for sublist in all_ids for item in sublist]
 
-###Concatonate fasta files if needed. Otherwise just import file
-if os.path.isdir(args.total_fasta):
-    recs_reduce=[]
-    filenames = [args.total_fasta+'/'+x for x in os.listdir(args.total_fasta) if '.fa' in x]
-    for x in filenames:
-        species=os.path.basename(x).replace('_unigene.faa','')
-        proteome=list(SeqIO.parse(x,'fasta'))
-        for seq in proteome:
-            if seq.id in flat_ids: 
-                seq.description=species
-                recs_reduce.append(seq)
-else:
-    recs=SeqIO.parse(args.total_fasta,'fasta')
-    recs_reduce=[x for x in recs if x.id in flat_ids]
-
-
-single_ogs=single_ogs[0:min(args.maxseqs,len(single_ogs))]
-for group in single_ogs:
-    row=og_table2[og_table2.Orthogroup==group]
-    og=row.iloc[0]['Orthogroup']
-    minus_og=row.drop('Orthogroup',axis=1)
-    idlist=list(minus_og.iloc[0])
-    seqlist=[x for x in recs_reduce if x.id in idlist]
-    for i in range(0,len(seqlist)):
-        seqlist[i].id=seqlist[i].description
+if args.mode=='seq':
+    #### get subset of all IDs to speed up process
+    for i in og_table2.columns:
+        all_ids.append(list(og_table2.loc[:,i]))
+    flat_ids=[item for sublist in all_ids for item in sublist]
     
-    SeqIO.write(seqlist,args.outdir+'/'+og+'.faa','fasta')
+    ###Concatonate fasta files if needed. Otherwise just import file
+    if os.path.isdir(args.total_fasta):
+        recs_reduce=[]
+        filenames = [args.total_fasta+'/'+x for x in os.listdir(args.total_fasta) if '.fa' in x]
+        for x in filenames:
+            species=os.path.basename(x).replace('_unigene.faa','')
+            proteome=list(SeqIO.parse(x,'fasta'))
+            for seq in proteome:
+                if seq.id in flat_ids: 
+                    seq.description=species
+                    recs_reduce.append(seq)
+    else:
+        recs=SeqIO.parse(args.total_fasta,'fasta')
+        recs_reduce=[x for x in recs if x.id in flat_ids]
+    
+    
+    single_ogs=single_ogs[0:min(args.maxseqs,len(single_ogs))]
+    for group in single_ogs:
+        row=og_table2[og_table2.Orthogroup==group]
+        og=row.iloc[0]['Orthogroup']
+        minus_og=row.drop('Orthogroup',axis=1)
+        idlist=list(minus_og.iloc[0])
+        seqlist=[x for x in recs_reduce if x.id in idlist]
+        for i in range(0,len(seqlist)):
+            seqlist[i].id=seqlist[i].description
+        
+        SeqIO.write(seqlist,args.outdir+'/'+og+'.faa','fasta')
+
+elif args.mode=='id':
+    og_table2.to_csv(args.outdir+'/one_to_one_orthology_table.tsv',sep='\t',index=False)
+
+else:
+    print('Please select a mode!')
