@@ -32,6 +32,7 @@ def list_to_df(x):
 CLI=argparse.ArgumentParser()
 CLI.add_argument("-file",type=str,help='Summary output file from BUSCO')
 CLI.add_argument("-dir",type=str,help='Directory containing BUSCO outputs')
+CLI.add_argument("-thresh",type=int,default=0,help='threshold for inclusion. e.g. 75 would remove species with below this value')
 args = CLI.parse_args()
 
 #args.dir='./clean_summary/'
@@ -53,6 +54,8 @@ if args.dir:
         blank=blank.append(sp_dataframe,ignore_index=True)
 
     #blank.columns=['Completeness','Single_copy','Duplicated','Fragmented','Missing','Species']
+    blank['Completeness']=pd.to_numeric(blank['Completeness'])
+    blank=blank[blank.Completeness>args.thresh]
     blank.to_csv(sys.stdout,index=False,sep='\t')
 
 elif args.file:

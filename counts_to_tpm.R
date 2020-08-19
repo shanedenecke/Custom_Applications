@@ -5,13 +5,13 @@ shhh(library(dplyr))
 shhh(library(readr))
 
 args=commandArgs(trailingOnly = T)
-#args[1]='./counts_output/counts.txt'
+#args[1]='Counts_output.tsv'
 
 
 counts.data=fread(as.character(args[1])) #%>% select(Geneid,Length,matches('out.bam'))
 
 cols=colnames(counts.data)
-iter=grep("out.bam",cols)
+iter=grep("bam",cols)
 normlen=counts.data$Length/1000
 
 tpm.data=select(counts.data,Geneid,Length)
@@ -22,7 +22,7 @@ for(i in iter){
   sc=sum(rpk)/1000000
   tpm=rpk/sc
   colnam1=unlist(strsplit(cols[i],'/'))
-  colnam2=colnam1[length(colnam1)-1]
+  colnam2=colnam1[length(colnam1)]
   tpm.data[[colnam2]]=tpm
 }
 

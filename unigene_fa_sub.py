@@ -9,72 +9,75 @@ Created on Sat May 18 17:20:39 2019
 
 import os
 from Bio import SeqIO
-import sys 
 import argparse
+import re
 
 os.path.dirname(os.path.abspath(__file__))
-#os.chdir('/home/shanedenecke/Dropbox/Misc/random/unigene_py_test')
+#os.chdir('/home/shanedenecke/Dropbox/quick_temp/abc_compare')
 
-#sys.argv=['','HomSap_unigene.faa','HomSap_SLC_genes.txt']
 
 
 CLI=argparse.ArgumentParser()
 CLI.add_argument("-fasta",type=str,default='HomSap_unigene.faa',help='Add fasta file')
-CLI.add_argument("-unigenes",type=str,default='HomSap_SLC_genes.txt',help='Add unigene list')
+CLI.add_argument("-mode",type=str,default='regex',help='Either "regex" or "file". Select regex if you want to filter the fasta all in one command. file takes a list of unique identifiers and uses that for filtering')
+CLI.add_argument("-codes",type=str,help='Add unigene list. Can either be regex string or file of ids depending on mode')
+CLI.add_argument("-outfmt",type=str,default='Full',help='"Full" or "Short". Do you want the final output to be the full description or only the ID')
+
+
 args = CLI.parse_args()
 
 
-
-### standard input
-#if not sys.stdin.isatty():
-#    args = CLI.parse_args()
-#    codes=[line.rstrip('\n') for line in sys.stdin] 
-#elif sys.stdin.isatty():
-#    args = CLI.parse_args()
-#    CLI.add_argument("-unigenes",type=str,default='HomSap_SLC_genes.txt',help='Add unigene list')
-#    codes=[line.rstrip('\n') for line in open(args.unigenes)]
-
+#args.fasta='pxug_v01.faa'
+#args.mode='regex'
+#args.codes='(PXUG_V[0-9]_[0-9]+).+$'
+#args.outfmt='Short'
 
 ### import data
 recs=SeqIO.to_dict(SeqIO.parse(args.fasta, 'fasta'),key_function=lambda rec: rec.description)
-codes=[line.rstrip('\n') for line in open(args.unigenes)]
-
-#print(codes)
-
-##define argument variables
-#if len(sys.argv)>2:
-#    recs=SeqIO.to_dict(SeqIO.parse(sys.argv[1], 'fasta'),key_function=lambda rec: rec.description)
-#    codes=[line.rstrip('\n') for line in open(sys.argv[2])]
-
-#if len(sys.argv)==2:
-#    recs=SeqIO.to_dict(SeqIO.parse(sys.stdin, 'fasta'))
-#    codes=[line.rstrip('\n') for line in open(sys.argv[1])]
 
 
-
-
+### initialize final dictionary which will contain all outputs
 final_dict={}
-for code in codes:   
+
+
+### obtain unicodes variable either from file or from regular expression depending on mode
+if args.mode=='regex':
+    codes=[re.sub(args.codes,'\\1',x) for x in recs.keys()]
+    unicodes=set(codes)
+else:
+    unicodes=[line.rstrip('\n') for line in open(args.codes)]
+
+
+### iterate over unicodes and subset out longest isoform
+for code in unicodes:
+    
+    ### remove starting > from id and find all instances of seqs in fasta
+    code=re.sub('>','',code)
     uni={k:v for (k,v) in recs.items() if code in k}
+    
+    #### skip code if not found in fasta
     if len(uni)==0:
         pass
-    elif len(uni)==1:
-        final_dict.update(uni)
-    elif len(uni)>1:
-        mat={k:len(v.seq) for (k,v) in recs.items() if code in k}
-        maximum=sorted(mat.values())[-1]
-        f={k:v for k,v in mat.items() if maximum==v}
+    
+    #### If found  then take longest isoform
+    elif len(uni)>0: 
+        mat={k:len(v.seq) for (k,v) in recs.items() if code in k} ### make dictionary with length of each seqeunce
+        maximum=sorted(mat.values())[-1] ### take longest one. If multiple will take random sequence
+        f={k:v for k,v in mat.items() if maximum==v} ###
         indkey=list(f.keys())[0]
-        final={indkey:recs[indkey]}
-        final_dict.update(final)
-        
+        final=recs[indkey]
+        if args.outfmt=='Full':
+            final_dict.update({final.description:final.seq})
+        elif args.outfmt=='Short':
+            final_dict.update({final.id:final.seq})        
 
-a=list(final_dict.values())
+
+### Write to temporary file
 with open('temp.fa','w') as f:
-    for i in a:
-        f.write('>'+i.description+'\n'+str(i.seq)+'\n')
+    for k,v in final_dict.items():
+        f.write('>'+k+'\n'+str(v)+'\n')
 
-
+### Print file for output
 x = open("temp.fa", "r")
 y=x.readlines()
 z=''.join(y)
@@ -83,15 +86,5 @@ if z[-1]=='\n':
 print (z)
 os.remove("temp.fa") 
 
-
-
-
-        
-
-        
-## Write temporary file
-
-
-## Read in temporary file and print properly formatted fasta
 
 
