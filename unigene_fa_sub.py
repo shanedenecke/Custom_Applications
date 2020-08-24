@@ -11,6 +11,8 @@ import os
 from Bio import SeqIO
 import argparse
 import re
+import sys
+from tqdm import tqdm
 
 os.path.dirname(os.path.abspath(__file__))
 #os.chdir('/home/shanedenecke/Dropbox/quick_temp/abc_compare')
@@ -18,7 +20,7 @@ os.path.dirname(os.path.abspath(__file__))
 
 
 CLI=argparse.ArgumentParser()
-CLI.add_argument("-fasta",type=str,default='HomSap_unigene.faa',help='Add fasta file')
+CLI.add_argument("-fasta",type=str,default=(None if sys.stdin.isatty() else sys.stdin),help='Add fasta file')
 CLI.add_argument("-mode",type=str,default='regex',help='Either "regex" or "file". Select regex if you want to filter the fasta all in one command. file takes a list of unique identifiers and uses that for filtering')
 CLI.add_argument("-codes",type=str,help='Add unigene list. Can either be regex string or file of ids depending on mode')
 CLI.add_argument("-outfmt",type=str,default='Full',help='"Full" or "Short". Do you want the final output to be the full description or only the ID')
@@ -49,7 +51,7 @@ else:
 
 
 ### iterate over unicodes and subset out longest isoform
-for code in unicodes:
+for code in tqdm(unicodes):
     
     ### remove starting > from id and find all instances of seqs in fasta
     code=re.sub('>','',code)
@@ -67,15 +69,19 @@ for code in unicodes:
         indkey=list(f.keys())[0]
         final=recs[indkey]
         if args.outfmt=='Full':
-            final_dict.update({final.description:final.seq})
+            with open('temp.fa','a') as f:
+                f.write('>'+final.description+'\n'+str(final.seq)+'\n')
+                #final_dict.update({final.description:final.seq})
         elif args.outfmt=='Short':
-            final_dict.update({final.id:final.seq})        
+            with open('temp.fa','a') as f:
+                f.write('>'+final.id+'\n'+str(final.seq)+'\n')
+            #final_dict.update({final.id:final.seq})        
 
 
 ### Write to temporary file
-with open('temp.fa','w') as f:
-    for k,v in final_dict.items():
-        f.write('>'+k+'\n'+str(v)+'\n')
+#with open('temp.fa','w') as f:
+#    for k,v in final_dict.items():
+#        f.write('>'+k+'\n'+str(v)+'\n')
 
 ### Print file for output
 x = open("temp.fa", "r")

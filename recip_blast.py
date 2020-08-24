@@ -24,16 +24,18 @@ CLI.add_argument("--evalue",type=int,default=1e-3,help='Threshold for evalue in 
 CLI.add_argument("--threads",type=int,default=2,help='Number of threads')
 CLI.add_argument("--outdir",type=str,default='Recip_blast_output',help='name of output directory')
 CLI.add_argument("--blast_type",type=str,default='blastp',help='Type of Blast that is performed. Can be blastx, blastp, blastx, or tblastn')
+CLI.add_argument("--target_spname",type=str,default='Species1',help='What is the name of the target species (column outputs)')
+CLI.add_argument("--input_spname",type=str,default='Species2',help='What is the name of the starting species (column outputs)')
 
 
 args = CLI.parse_args()
 
-#args.target='./SpoFru_sequences/SpoFru_Corn_linear_transcripts.fna'
-#args.input='./DroMel/DroMel_unigene.faa'
-#args.seqs='./DroMel/dm_marker_genes.txt'
-#args.blast_type='tblastn'
-#args.outdir='TblastN_Corn'
-
+#os.chdir('/mnt/disk/shane/temp/raw_proteomes')
+#args.target='./DroMel_unigene.faa'
+#args.input='./SpoFru_unigene.faa'
+#args.seqs='./SpoFru_ids.txt'
+#args.blast_type='blastp'
+#args.outdir='SpoFru_DroMel_recip'
 
 ### parse blast type
 if args.blast_type=='blastp':
@@ -86,19 +88,42 @@ if len([x for x in os.listdir(target_dir) if re.search(target_base+'.psq',x)])==
 with open(args.seqs) as f:
     input_ids=[line.rstrip() for line in f]
 
-### Run loop
-input_seqs=[]
-bad=[]
-for i in input_ids:
-    try:
-        temp=[x for x in SeqIO.parse(args.input,'fasta') if re.search(i,x.id)][0]
-        input_seqs.append(temp)
-    except:
-       print(i+' Not found in Fasta file') 
-## Write initial search seqeunces fasta file
-SeqIO.write(input_seqs,args.outdir+'/input_sequences.faa','fasta')
 
- 
+### import data
+recs=SeqIO.to_dict(SeqIO.parse(args.input, 'fasta'),key_function=lambda rec: rec.description)
+
+
+### initialize final dictionary which will contain all outputs
+final_dict={}
+
+
+### iterate over unicodes and subset out longest isoform
+for code in input_ids:
+    
+    ### remove starting > from id and find all instances of seqs in fasta
+    code=re.sub('>','',code)
+    uni={k:v for (k,v) in recs.items() if code in k}
+    
+    #### skip code if not found in fasta
+    if len(uni)==0:
+        pass
+    
+    #### If found  then take longest isoform
+    elif len(uni)>0: 
+        mat={k:len(v.seq) for (k,v) in recs.items() if code in k} ### make dictionary with length of each seqeunce
+        maximum=sorted(mat.values())[-1] ### take longest one. If multiple will take random sequence
+        f={k:v for k,v in mat.items() if maximum==v} ###
+        indkey=list(f.keys())[0]
+        final=recs[indkey]
+        final_dict.update({final.id:final.seq})        
+
+
+### Write to temporary file
+with open(args.outdir+'/input_sequences.faa','w') as f:
+    for k,v in final_dict.items():
+        f.write('>'+k+'\n'+str(v)+'\n')
+
+
   
 ### Run initial blast
 cmd=[blast1,'-query',args.outdir+'/input_sequences.faa','-db',args.target,'-qcov_hsp_perc',str(args.qcov),'-evalue',str(args.evalue),
@@ -155,16 +180,19 @@ for k,v in ind.items():
     #recip_hit=red[v]
     #recip_hit=[k for k,v in ind.items() if v==recip_value][0]
     
+   
     if k not in red.values():
         print('no reciprocal match for '+k)
+    elif v not in red.keys():
+    	print('reciprocal mismatch for '+k)
     elif k==red[v]:
         final_d.update({k:v})
     else:
          print('reciprocal mismatch for '+k)
 
-        
+      
 final_frame=pd.DataFrame(list(final_d.items()))    
-final_frame.columns=['Species1','Species2']
+final_frame.columns=[args.input_spname,args.target_spname]
 final_frame.to_csv(args.outdir+'/Final_reciprocal_best_hits.tsv',index=False)
 
 try:
@@ -174,10 +202,15 @@ except:
 
 for i in range(final_frame.shape[0]):
     row=final_frame.iloc[i,:]
-    start=row.Species1
-    target=row.Species2
+    start=row[args.input_spname]
+    target=row[args.target_spname]
     fa_raw=[x for x in SeqIO.parse(args.outdir+'/Target_best_hits.faa','fasta') if x.id==target][0]
-    fa_raw.id=target+'__'+start
+    fa_raw.id=args.target_spname+'__'+target+'__'+args.input_spname+'__'+start
     with open(args.outdir+'/Final_reciprocal_hits.fasta','a') as f:
         f.write('>'+fa_raw.id+'\n')
         f.write(str(fa_raw.seq)+'\n')
+
+
+
+
+
