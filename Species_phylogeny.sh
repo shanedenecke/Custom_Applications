@@ -11,7 +11,7 @@ if [ "$1" == "-h" ]; then
   
   Arguments:
   
-  -taxid_codes: File path for taxid codes. For OrthoDB must be taxid numbers (e.g. 12345_0). For Orthofinder must be 6 letter species abbreviations
+  -taxid_codes: File path for taxid codes. For OrthoDB must be taxid numbers (e.g. 12345_0). For  must be 6 letter species abbreviations
   -ortho_algo: Algorithm to find 1:1 orthologues. Can be either 'OrthoDB' or 'OrthoFinder'. These have predefined paths on chrysalida to precomputed files/proteoms
   -outgroups: outgroups used for species tree if any
   -threads: Self explanatory"
@@ -50,9 +50,9 @@ elif [ $algo == 'Orthofinder' ]; then
     echo 'Starting Orthofinder search'
     mkdir $base/tempseqs
     grep -f $taxids ~/Applications/Custom_Applications/OrthoDB_source/taxid_sp_convert.tsv | cut -f 2 | while read i;do cp ~/Applications/Custom_Applications/OrthoDB_source/species_proteomes/$i'_unigene.faa' ./$base/tempseqs/$i'_unigene.faa'; done ### copy proteome files 
-    ~/Applications/OrthoFinder/orthofinder -og -f $base/tempseqs -o $base/orthofinder_temp
+    ~/Applications/OrthoFinder/orthofinder -t $THREADS -og -f $base/tempseqs -o $base/orthofinder_temp
     #cat $base/tempseqs/*.faa > $base/tempseqs/total_proteome.faa ### create master proteome 
-    python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -inputdir $base/orthofinder_temp -total_fasta $base/tempseqs/ -maxseqs 200
+    python3 ~/Applications/Custom_Applications/Orthofind_parse.py -outdir $base/one_to_one -indir $base/orthofinder_temp -total_fasta $base/tempseqs/ -maxseqs 200 -mode seq
   fi
 
 ### perform alignments for all one to ones 
@@ -70,7 +70,8 @@ sed -i 's/\./A/g' $base/one_to_one'/Full_species.phy'
 ### Perform RaxML tree
   if echo $outgroups | grep -Eq "None|none" ; then
   echo "Running without outgroups"
-  ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath $base/rax_output/)
+  #~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath $base/rax_output/)
+  ~/Applications/raxml-ng --all --msa $base/one_to_one'/Full_species.phy' --prefix $(realpath $base/rax_output/$base.nwk) --threads $THREADS  --bs-trees autoMRE{200} --model LG+G8+F --redo
 else
   echo "Running with outgroups"
     ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 100 -T $THREADS -m PROTGAMMAAUTO -s $base/one_to_one'/Full_species.phy' -n $base.nwk -w $(realpath $base/rax_output/) -o $outgroups 

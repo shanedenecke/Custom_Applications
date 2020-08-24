@@ -1,27 +1,40 @@
 ### ###################### Create HMM profiles for each SLC family in species ###################
 ##
 
-## argument 1= name of fasta file
-## argument 2= Number of threads 
-## argument 3= outgroup 
-#cd /data2/shane/Documents/transporter_candidate_phylogeny/fasta
-#A=ABCB_family.faa
-#B=24
-### Align and produce raxML tree
 
+### add help 
+if [ "$1" == "-h" ]; then
+  echo "
+  Welcome ! This shell script is designed to search SLC transporters in non-model arthropods
+  
+  Arguments:
+  
+  -proteins: Path to folder containing one or more Arthropod proteomes that you wish to search. Protoemes should be labled witht a 6 letter abbreviation followed by '_unigene.faa' e.g. DroMel_unigene.faa for Drosophila melanogaster 
+  -threads: Self explanatory
+  -outgroup: Output diretory where all of your outputs will be located. Note: They will be put into relevant subdiretories automatically
+  "
+  exit 0
+fi
 
+### add arguments
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -proteins) PROTEINS="$2"; shift 2;;
+    -threads) THREADS="$2"; shift 2;;
+    -outgroup) OUTGROUP="$2"; shift 2;;
+  esac
+done
 
 ## use these for debugging
 
 ################################################################################
-
-base=$(echo $(basename $1) | cut -d '.' -f 1)
+base=$(echo $(basename $PROTEINS) | cut -d '.' -f 1)
 mkdir $base
 
 
-sed 's/-/_/g' $1 >  $base'/clean_'$base'.faa'
+sed 's/-/_/g' $PROTEINS >  $base'/clean_'$base'.faa'
 
-mafft --thread $2 $base'/clean_'$base'.faa' > $base'/'$base'.aln'
+mafft --thread $THREADS $base'/clean_'$base'.faa' > $base'/'$base'.aln'
 ~/Applications/trimal/source/trimal -automated1 -phylip_paml  -in $base'/'$base'.aln' -out $base'/'$base'.aln.trimm.phy'
 Rscript ~/Applications/Custom_Applications $base
 
@@ -31,13 +44,13 @@ raxdir=$(pwd)'/'$base'/'
 
 
 
-if [ ! -z $3 ]  ]
+if [ ! -z $OUTGROUP ]  ]
    then
     echo 'without outgroup'
-   ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $2 -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir
+   ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir
 
  else
     echo 'include outgroup'
-    ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $2 -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir -o $3
+    ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir -o $OUTGROUP
  fi
   
