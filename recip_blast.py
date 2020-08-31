@@ -72,12 +72,12 @@ except:
 ### make blast databases
 input_dir=os.path.dirname(args.input)
 input_base=os.path.basename(args.input)#.split('.')[0:-1] #base=''.join(base) ### extra code for collapsing list
-if len([x for x in os.listdir(input_dir) if re.search(input_base+'.psq',x)])==0:
+if len([x for x in os.listdir('./'+input_dir) if re.search(input_base+'.psq',x)])==0:
     sp.run(['makeblastdb','-in',args.input,'-parse_seqids','-dbtype',db1])
 
 target_dir=os.path.dirname(args.target)
 target_base=os.path.basename(args.target)
-if len([x for x in os.listdir(target_dir) if re.search(target_base+'.psq',x)])==0:
+if len([x for x in os.listdir('./'+target_dir) if re.search(target_base+'.psq',x)])==0:
     print('test')
     sp.run(['makeblastdb','-in',args.target,'-parse_seqids','-dbtype',db2])
 

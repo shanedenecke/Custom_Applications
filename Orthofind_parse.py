@@ -20,17 +20,25 @@ import shutil
 
 ########## Read in ARGS
 CLI=argparse.ArgumentParser()
-CLI.add_argument("-outdir",type=str,default='./Hemispec/one_to_one',help='Choose directory for 1:1 orthologue sequences')
-CLI.add_argument("-indir",type=str,default='./Hemispec/orthofinder_temp',help='Output directory from Orhtofinder. Top level of Orthofinder outpu')
-CLI.add_argument("-total_fasta",type=str,default='./Hemispec/tempseqs/total_proteome.faa',help='All possible fasta sequences from the analysis in a single file')
+CLI.add_argument("-outdir",type=str,help='Choose directory for 1:1 orthologue sequences')
+CLI.add_argument("-indir",type=str,help='Output directory from Orhtofinder. Top level of Orthofinder outpu')
+CLI.add_argument("-total_fasta",type=str,help='All possible fasta sequences from the analysis in a single file')
 CLI.add_argument("-maxseqs",type=int,default=1000000000,help='maximum number of sequences to retrieve')
 CLI.add_argument("-mode",type=str,default='id',help='Either seq or id. Do you want seqeunces to be returned or a table with IDs?')
 
 args = CLI.parse_args()
 
 
+
+
 ### create ouput directory
-#os.chdir('/home/shanedenecke/Dropbox/test')
+#os.chdir('/mnt/disk/shane/Transporter_ID/Arthropod_ABC_pipeline/')
+#args.outdir='./CAFE/Hemimetabola_taxid_codesc/one_to_one'
+#args.indir='./CAFE/Hemimetabola_taxid_codes/orthofinder_temp'
+#args.total_fasta='./CAFE/Hemimetabola_taxid_codes/tempseqs/'
+#args.maxseqs=100000
+#args.mode='seq'
+
 try:
     shutil.rmtree(args.outdir) ### remove directory if already exists 
 except:
@@ -48,15 +56,16 @@ with open(args.indir+'/Orthogroups/Orthogroups_SingleCopyOrthologues.txt') as f:
 ### Import orthogroups
 og_table=pd.read_csv(args.indir+'/Orthogroups/Orthogroups.tsv',sep='\t')
 og_table2=og_table[og_table.Orthogroup.isin(single_ogs)]
+if 'NezVir_unigene' in og_table2.columns: og_table2.NezVir_unigene=[x.split(' ')[0] for x in og_table2.NezVir_unigene]
 all_ids=[]
 
 
-if args.mode=='seq':
+if args.mode=='seq': ############# BROKEN
     #### get subset of all IDs to speed up process
     for i in og_table2.columns:
         all_ids.append(list(og_table2.loc[:,i]))
     flat_ids=[item for sublist in all_ids for item in sublist]
-    
+    #flat_ids=[x.split(' ')[0] for x in flat_ids]
     ###Concatonate fasta files if needed. Otherwise just import file
     if os.path.isdir(args.total_fasta):
         recs_reduce=[]

@@ -47,8 +47,8 @@ raxdir=$(pwd)'/'$base'/'
 if [ ! -z $OUTGROUP ]  ]
    then
     echo 'without outgroup'
-   ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir
-
+   #~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir
+  ~/Applications/raxml-ng --all --msa $raxfile --prefix $(realpath $raxdir/$base.nwk) --threads $THREADS  --bs-trees autoMRE{500} --model LG+G8+F --redo
  else
     echo 'include outgroup'
     ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir -o $OUTGROUP
