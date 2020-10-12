@@ -27,3 +27,4 @@ codes="[^A|^C|^D|^E|^F|^G|^H|^I|^K|^L|^M|^N|^P|^Q|^R|^S|^T|^V|^W|^Y|^Z]"
 
 
 sed -i -E "/^[^>]/s/$codes//g" $PROTEOME 
+sed -i -E "/^>/s/\(|\)/_/g" $PROTEOME

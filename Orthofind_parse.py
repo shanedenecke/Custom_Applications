@@ -39,12 +39,14 @@ args = CLI.parse_args()
 #args.maxseqs=100000
 #args.mode='seq'
 
-try:
-    shutil.rmtree(args.outdir) ### remove directory if already exists 
-except:
-     pass
+if args.outdir is not None:
+	try:
+	    shutil.rmtree(args.outdir) ### remove directory if already exists 
+	except:
+	     pass
 
-os.makedirs(args.outdir)
+	os.makedirs(args.outdir)
+
 os.system('cp -r '+args.indir+'/*/Orthogroups '+args.indir+'/') ### extract contents
 
 
@@ -95,7 +97,7 @@ if args.mode=='seq': ############# BROKEN
         SeqIO.write(seqlist,args.outdir+'/'+og+'.faa','fasta')
 
 elif args.mode=='id':
-    og_table2.to_csv(args.outdir+'/one_to_one_orthology_table.tsv',sep='\t',index=False)
-
+    #og_table2.to_csv(args.outdir+'/one_to_one_orthology_table.tsv',sep='\t',index=False)
+	print(og_table2.to_csv(sep='\t',index=False))
 else:
     print('Please select a mode!')
