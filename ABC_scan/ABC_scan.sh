@@ -13,7 +13,7 @@ if [ "$1" == "-h" ]; then
   
   Arguments:
   
-  -target: Path to folder containing one or more Arthropod proteomes that you wish to search. Protoemes should be labled witht a 6 letter abbreviation followed by '_unigene.faa' e.g. DroMel_unigene.faa for Drosophila melanogaster 
+  -proteome: Path to folder containing one or more Arthropod proteomes that you wish to search. Protoemes should be labled witht a 6 letter abbreviation followed by '_unigene.faa' e.g. DroMel_unigene.faa for Drosophila melanogaster 
   -threads: Self explanatory
   -outdir: Output diretory where all of your outputs will be located. Note: They will be put into relevant subdiretories automatically
   -hmm_profile: A HMM profile to search with
