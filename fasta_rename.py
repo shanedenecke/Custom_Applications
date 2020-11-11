@@ -14,25 +14,37 @@ import pandas as pd
 from Bio import SeqIO
 from Bio.SeqIO.FastaIO import FastaWriter
 import sys 
+import argparse
 
 
 os.path.dirname(os.path.abspath(__file__))
-#os.chdir('/home/shanedenecke/fa_rename_opt')
+#os.chdir('/home/shanedenecke/Dropbox/quick_temp')
 
 #sys.argv=['','/home/shanedenecke/fa_rename_opt/HomSap_unigene.faa','/home/shanedenecke/fa_rename_opt/HomSap_SLC_dict.csv']
 #sys.argv=['','/home/shanedenecke/fa_rename_opt/AcrEch.fasta','/home/shanedenecke/fa_rename_opt/AcrEch_OrthoDB_key_DICT2.txt']
 
+###### Read in ARGS
+CLI=argparse.ArgumentParser()
+CLI.add_argument("-fasta",type=str,help='The fasta you want to rename',default=sys.stdin)
+CLI.add_argument("-rename",type=str,help='A table (csv) with two columns, code and name. The code must match something unique in each fasta record. The name is the new name')
+
+args = CLI.parse_args()
+
+#args.fasta='./HomSap_unigene.faa'
+#args.
 
 
+df=pd.read_csv(args.rename,sep=',',header=0,dtype=str)
+fa=list(SeqIO.parse(str(args.fasta), 'fasta'))
 ##define argument variables
-if len(sys.argv)>2:
-    df=pd.read_csv(sys.argv[2],sep=',',header=0,dtype=str)
-    fa=list(SeqIO.parse(str(sys.argv[1]), 'fasta'))
-    raw=SeqIO.parse(str(sys.argv[1]), 'fasta')
-elif len(sys.argv)==2:
-    df=pd.read_csv(sys.argv[1],sep=',',header=0,dtype=str)
-    fa=list(SeqIO.parse(sys.stdin, 'fasta'))
-    raw=list(SeqIO.parse(sys.stdin, 'fasta'))
+#f len(sys.argv)>2:
+#    df=pd.read_csv(sys.argv[2],sep=',',header=0,dtype=str)
+#    fa=list(SeqIO.parse(str(sys.argv[1]), 'fasta'))
+#    raw=SeqIO.parse(str(sys.argv[1]), 'fasta')
+#elif len(sys.argv)==2:
+#    df=pd.read_csv(sys.argv[1],sep=',',header=0,dtype=str)
+#    fa=list(SeqIO.parse(sys.stdin, 'fasta'))
+#    raw=list(SeqIO.parse(sys.stdin, 'fasta'))
 
 #names=list(df['name'])
 codes=list(df['code'])

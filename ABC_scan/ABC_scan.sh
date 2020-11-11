@@ -18,6 +18,7 @@ if [ "$1" == "-h" ]; then
   -outdir: Output diretory where all of your outputs will be located. Note: They will be put into relevant subdiretories automatically
   -hmm_profile: A HMM profile to search with
   -database: protein database for reciprocal blast
+  -prefix: What do you want the prefix of your sequence names to be?
   -print: Do you want to print the final output to the terminal
   "
   exit 0
@@ -29,6 +30,7 @@ while [ "$#" -gt 0 ]; do
     -proteome) PROTEOME="$2"; shift 2;;
     -hmm_profile) HMM_PROFILE="$2"; shift 2;;
     -database) DATABASE="$2"; shift 2;;
+    -prefix) PREFIX="$2"; shift 2;;
     -threads) THREADS="$2"; shift 2;;
     -outdir) OUTDIR="$2"; shift 2;;
     -print) PRINT="$2"; shift 2;;

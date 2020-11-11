@@ -15,6 +15,7 @@ p <- add_argument(p, "--raxtree", help="path to raxml tree")
 p <- add_argument(p, "--species", help="file of species names. Defaults to automatic detection. 'None' signals that all colors will be black")
 p <- add_argument(p, "--output", help="path to output pdf",default='./')
 p <- add_argument(p, "--branch_collapse", help="bootsrap value to collapse nodes at",default=20)
+p <- add_argument(p, "--outfmt", help="Do you want a png or pdf",default="pdf")
 
 argv=parse_args(p)
 

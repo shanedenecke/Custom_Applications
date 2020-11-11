@@ -17,9 +17,9 @@ import sys
 
 
 os.path.dirname(os.path.abspath(__file__))
-#os.chdir('/home/shanedenecke/fa_rename_opt')
+#os.chdir('/home/shanedenecke/Dropbox/quick_temp/ABC_search/BemTab')
 
-#sys.argv=['','/home/shanedenecke/fa_rename_opt/HomSap_unigene.faa','/home/shanedenecke/fa_rename_opt/HomSap_SLC_dict.csv']
+#sys.argv=['','/home/shanedenecke/Dropbox/quick_temp/ABC_search/BemTab/total_ABC_pre_blast.faa','/home/shanedenecke/Dropbox/quick_temp/ABC_search/BemTab/total_ABC_dict.csv']
 #sys.argv=['','/home/shanedenecke/fa_rename_opt/AcrEch.fasta','/home/shanedenecke/fa_rename_opt/AcrEch_OrthoDB_key_DICT2.txt']
 
 
@@ -56,10 +56,21 @@ for i in fa:
     
 
 ## Write temporary file
-handle = open('temp.fa', "w")
-writer = FastaWriter(handle, wrap=0)
-writer.write_file(fa)
-handle.close()
+#handle = open('temp.fa', "w")
+#writer = FastaWriter(handle, wrap=0)
+#writer.write_file(fa)
+#handle.close()
+#SeqIO.write(fa,'temp.fa','fasta')
+
+
+with open('temp.fa','w') as file:
+    for i in fa:
+        file.write('>'+i.id)
+        file.write('\n')
+        file.write(str(i.seq))
+        file.write('\n')
+
+
 
 ## Read in temporary file and print properly formatted fasta
 x = open("temp.fa", "r")
