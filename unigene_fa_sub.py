@@ -15,7 +15,7 @@ import sys
 from tqdm import tqdm
 
 os.path.dirname(os.path.abspath(__file__))
-#os.chdir('/home/shanedenecke/Dropbox/quick_temp/abc_compare')
+#os.chdir('/home/shanedenecke/Dropbox/omics_projects/Ha_midgut_atlas')
 
 
 
@@ -29,9 +29,9 @@ CLI.add_argument("-outfmt",type=str,default='Full',help='"Full" or "Short". Do y
 args = CLI.parse_args()
 
 
-#args.fasta='pxug_v01.faa'
+#args.fasta='./proteomes/DroMel_unigene.faa'
 #args.mode='regex'
-#args.codes='(PXUG_V[0-9]_[0-9]+).+$'
+#args.codes='CAH|CAR'
 #args.outfmt='Short'
 
 ### import data
@@ -44,7 +44,7 @@ final_dict={}
 
 ### obtain unicodes variable either from file or from regular expression depending on mode
 if args.mode=='regex':
-    codes=[re.sub(args.codes,'\\1',x) for x in recs.keys()]
+    codes=[x for x in recs.keys() if re.search(args.codes,x)]
     unicodes=set(codes)
 else:
     unicodes=[line.rstrip('\n') for line in open(args.codes)]
