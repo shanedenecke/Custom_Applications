@@ -26,7 +26,7 @@ os.path.dirname(os.path.abspath(__file__))
 CLI=argparse.ArgumentParser()
 CLI.add_argument("-fasta",type=str,default='./GCF_011064685.1_ZJU_Sfru_1.0_protein.faa',help='Fasta file downloaded from NCBI')
 CLI.add_argument("-gff",type=str,default='./GCF_011064685.1_ZJU_Sfru_1.0_genomic.gff',help='GFF file downloaded from NCBI genome page')
-#CLI.add_argument("-genName",type=str,default='gene',help='Field identifier for gene in GFF file')
+CLI.add_argument("-seqName",type=str,default='gene',help='How do you want your final fasta sequences to be called. Can be "gene", "protein", or "both"')
 #CLI.add_argument("-outName",type=str,default='unigene.faa',help='name of output file')
 
 
@@ -64,12 +64,18 @@ unicodes=list(longest['protein'])
 
 
 ########## Subset Fasta file ##########
-
 for i in tqdm(unicodes):
     temp=recs[i]
-    temp.id=i+'__'+longestDict[i]
+    if args.seqName=='both':
+         temp.id=i+'__'+longestDict[i]
+    elif args.seqName=='gene':
+        temp.id=longestDict[i]
+    elif args.seqName=='protein':
+        temp.id=i
+    
+    
     with open('temp.fa','a') as f:
-                f.write('>'+temp.id+'\n'+str(temp.seq)+'\n')
+        f.write('>'+temp.id+'\n'+str(temp.seq)+'\n')
 
 x = open("temp.fa", "r")
 open("temp.fa", "r")
@@ -79,3 +85,6 @@ if z[-1]=='\n':
     z=z[:-1]
 print (z)
 os.remove("temp.fa") 
+
+os.system('spd-say "My four four make sure all yo kids dont grow"')
+
