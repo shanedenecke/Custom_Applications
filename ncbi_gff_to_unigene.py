@@ -43,7 +43,7 @@ recs=SeqIO.to_dict(SeqIO.parse(args.fasta, 'fasta'),key_function=lambda rec: rec
 
 ########## Process GFF into key with gene protein length
 gff_sub=gff_raw[gff_raw[2]=='CDS'][[2,3,4,8]]
-gff_sub[8]=[re.sub('ID=cds-([X|Y]P_[0-9]+..).+gene=(LOC[0-9]+).+$','\\1__\\2',x) for x in gff_sub[8]]
+gff_sub[8]=[re.sub('ID=cds-([X|Y]P_[0-9]+..).+gene=(.+);product.+$','\\1__\\2',x) for x in gff_sub[8]]
 gff_sub[['protein','gene']]=gff_sub[8].str.split('__',expand=True)
 gff_sub=gff_sub[~gff_sub['gene'].isna()]
 gff_sub['length']=abs(gff_sub[3]-gff_sub[4])
