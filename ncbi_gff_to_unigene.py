@@ -38,12 +38,15 @@ gff_raw=pd.read_csv(args.gff,sep='\t',comment='#',header=None)
 recs=list(SeqIO.parse(args.fasta, 'fasta'))
 recs=SeqIO.to_dict(SeqIO.parse(args.fasta, 'fasta'),key_function=lambda rec: rec.id)
 
+#re.sub('(^.+?);.+$','\\1',g)
 
 
 
 ########## Process GFF into key with gene protein length
 gff_sub=gff_raw[gff_raw[2]=='CDS'][[2,3,4,8]]
-gff_sub[8]=[re.sub('ID=cds-([X|Y]P_[0-9]+..).+gene=(.+);product.+$','\\1__\\2',x) for x in gff_sub[8]]
+gff_sub[8]=[re.sub('ID=cds-([X|Y]P_[0-9]+..).+gene=(.+?);.+$','\\1__\\2',x) for x in gff_sub[8]]
+#gff_sub[8]=[re.sub('(^.+);.+','\\1',x) for x in gff_sub[8]]
+
 gff_sub[['protein','gene']]=gff_sub[8].str.split('__',expand=True)
 gff_sub=gff_sub[~gff_sub['gene'].isna()]
 gff_sub['length']=abs(gff_sub[3]-gff_sub[4])
@@ -86,5 +89,5 @@ if z[-1]=='\n':
 print (z)
 os.remove("temp.fa") 
 
-os.system('spd-say "My four four make sure all yo kids dont grow"')
+os.system('spd-say "boooooooooooooooooooshit"')
 
