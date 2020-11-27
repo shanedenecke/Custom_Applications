@@ -13,13 +13,19 @@ if [ "$1" == "-h" ]; then
   
   Arguments:
   
-  -proteome: Path to folder containing one or more Arthropod proteomes that you wish to search. Protoemes should be labled witht a 6 letter abbreviation followed by '_unigene.faa' e.g. DroMel_unigene.faa for Drosophila melanogaster 
+  -proteome: Path to folder containing one or more Arthropod proteomes that you wish to search. 
   -threads: Self explanatory
-  -outdir: Output diretory where all of your outputs will be located. Note: They will be put into relevant subdiretories automatically
-  -hmm_profile: A HMM profile to search with
-  -database: protein database for reciprocal blast
-  -prefix: What do you want the prefix of your sequence names to be?
+  -outdir: Output diretory where all of your outputs will be located. Note: Directory will be created and files will be put into relevant subdiretories automatically
+  
+  Optional arguments
+  
+  -prefix: What do you want the prefix of your sequence names to be? Defaults to first 6 letters of the filename
   -print: Do you want to print the final output to the terminal
+  -hmm_profile: A HMM profile to search with. Defaults to PF00005
+  -database:  protein database for reciprocal blast. Defaults to Drosophila_Tribolium_Human_Tetranychus database. 
+  -minlen: The minimum length of proteins for filtering. Defaults to 250
+  -motif: Motif to search for in MEME format. Defaults to 3 common ABC formats
+  -domain_filter: Do you want to filter based on DOMAIN? default NA
   "
   exit 0
 fi
@@ -34,7 +40,6 @@ while [ "$#" -gt 0 ]; do
     -threads) THREADS="$2"; shift 2;;
     -outdir) OUTDIR="$2"; shift 2;;
     -print) PRINT="$2"; shift 2;;
-    -motif) MOTIF="$2"; shift 2;;
     -minlen) MINLEN="$2"; shift 2;;
     -motif) MOTIF="$2"; shift 2;;
     -domain_filter) DOMAIN_FILTER="$2"; shift 2;;
@@ -60,7 +65,6 @@ if [ -z $OUTDIR ];then OUTDIR="./ABC_search"; fi
 if [ -z $PRINT ];then PRINT="NO"; fi
 if [ -z $THREADS ];then THREADS=4; fi
 if [ -z $MINLEN ];then MINLEN=250; fi
-if [ -z $MOTIF ];then MOTIF=NA; fi
 if [ -z $DOMAIN_FILTER ];then DOMAIN_FILTER=NA; fi
 
 #echo $PROTEOME
