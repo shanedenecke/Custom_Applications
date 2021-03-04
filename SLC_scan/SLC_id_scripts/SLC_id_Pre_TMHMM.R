@@ -42,11 +42,11 @@ abbreviation=argv$ab
 
 
 ### Debugging
-#setwd('/mnt/disk/shane/Transporter_ID/SLC_test/HelZea_test/')
+#setwd('/mnt/disk/shane/temp/SLC_test/bommor')
 #scriptPath='/home/sdenecke/Applications/Custom_Applications/SLC_scan/SLC_id_scripts'
 #sourcePath=dirname(scriptPath)
-#proteome="/mnt/disk/shane/Transporter_ID/SLC_test/proteomes/HelZea_unigene.faa"
-#abbreviation="HelZea"
+#proteome='/mnt/disk/shane/temp/SLC_test/bommor_unigene.faa'
+#abbreviation="bommor"
 
 print(sourcePath)
 print(scriptPath)
@@ -64,8 +64,9 @@ dict=fread('./Preliminary_SLC_table.csv')
 fam=sapply(dict$name,dash.remove)
 dict$abbreviation=abbreviation
 dict$family=fam
-dict2=merge(dict,select(meta.data,Species_name,abbreviation),by='abbreviation',use.names=T) %>% mutate(name)
-dict2$name=paste(dict2$Species_name,dict2$abbreviation,dict2$code,dict2$name,sep='___')
+#dict2=merge(dict,select(meta.data,Species_name,abbreviation),by='abbreviation',use.names=T) %>% mutate(name)
+dict2=dict
+dict2$name=paste(dict2$abbreviation,dict2$code,dict2$name,sep='___')
 dict2$name=gsub(' ','_',dict2$name)
 dict2$code=as.character(dict2$code)
 ind.rename.dict= dict2 %>% select(name,code)

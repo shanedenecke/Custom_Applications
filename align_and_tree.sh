@@ -35,8 +35,8 @@ mkdir $base
 sed 's/-/_/g' $PROTEINS >  $base'/clean_'$base'.faa'
 
 mafft --thread $THREADS $base'/clean_'$base'.faa' > $base'/'$base'.aln'
-~/Applications/trimal/source/trimal -automated1 -phylip_paml  -in $base'/'$base'.aln' -out $base'/'$base'.aln.trimm.phy'
-Rscript ~/Applications/Custom_Applications $base
+/home/sdenecke/Applications/trimal/source/trimal -automated1 -phylip_paml  -in $base'/'$base'.aln' -out $base'/'$base'.aln.trimm.phy'
+#Rscript /home/sdenecke/Applications/Custom_Applications $base
 
 
 raxfile=$base'/'$base'.aln.trimm.phy'
@@ -48,9 +48,9 @@ if [ ! -z $OUTGROUP ]  ]
    then
     echo 'without outgroup'
    #~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir
-  ~/Applications/raxml-ng --all --msa $raxfile --prefix $(realpath $raxdir/$base.nwk) --threads $THREADS  --bs-trees autoMRE{500} --model LG+G8+F --redo
+ /home/sdenecke/Applications/raxml-ng --all --msa $raxfile --prefix $(realpath $raxdir/$base.nwk) --threads $THREADS  --bs-trees autoMRE{500} --model LG+G8+F --redo
  else
     echo 'include outgroup'
-    ~/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir -o $OUTGROUP
+    /home/sdenecke/Applications/raxml/raxmlHPC-PTHREADS-AVX -f a -x 12345 -p 12345 -N 500 -T $THREADS -m PROTGAMMAAUTO -s $raxfile -n $base'.tre' -w $raxdir -o $OUTGROUP
  fi
   

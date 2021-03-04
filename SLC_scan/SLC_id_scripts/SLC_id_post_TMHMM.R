@@ -98,8 +98,10 @@ unfiltered_dict=fread('./TMHMM_filter/Renamed_unfiltered_SLC_dict.csv')
 arth.hmm=fread('./TMHMM_filter/SLC_TMHMM_scores.txt',header=F,sep='\t',fill=T) 
 colnames(arth.hmm)=c('name','tm_count')
 arth.hmm=arth.hmm[grepl('__',name)]
-arth.hmm=separate(data=arth.hmm,col=name,sep='___',into=c('Species_name','abbreviation','code','family'))
-arth.hmm.annot=merge(arth.hmm,meta.full,by=c('Species_name','abbreviation'))
+arth.hmm=separate(data=arth.hmm,col=name,sep='___',into=c('abbreviation','code','family'))
+arth.hmm.annot=arth.hmm
+
+#arth.hmm.annot=merge(arth.hmm,meta.full,by=c('Species_name','abbreviation'))
 arth.hmm.annot$family=sapply(arth.hmm.annot$family,dash.remove)
 
 
@@ -125,7 +127,7 @@ for(i in 1:nrow(model.hmm.key)){
 
 #### FORMAT AND OUTPUT DICTIONARY
 tmhmm.filtered.full=rbindlist(g.l)
-tmhmm.filtered.full=tmhmm.filtered.full %>% mutate(name=paste0(Species_name,'___',abbreviation,'___',code,'___',family,'_')) %>% data.table()
+tmhmm.filtered.full=tmhmm.filtered.full %>% mutate(name=paste0(abbreviation,'___',code,'___',family,'_')) %>% data.table()
 tmhmm.removed=rbindlist(b.l)
 fwrite(tmhmm.filtered.full,'./Final_outputs/Total_dictionary.csv')
 fwrite(tmhmm.removed,'./Final_outputs/TMM_filtered_out.csv')
