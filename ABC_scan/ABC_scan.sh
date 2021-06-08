@@ -104,7 +104,7 @@ hmmsearch --domtblout $OUTDIR/$PREFIX/HMM_PF00005_output.tsv $HMM_PROFILE $OUTDI
 cat $OUTDIR/$PREFIX/HMM_PF00005_output.tsv | tail -n +4 | head -n -10 > $OUTDIR/$PREFIX/HMM_PF00005_output_clean.tsv
 
 ## Get motif content
-mast -hit_list $MOTIF $OUTDIR/$PREFIX/Preliminary_ABCs.faa -notext -nohtml -nostatus | tail -n +3 | head -n -1 | sed -E 's/\s+/___/g' | sed 's/___/\t/g' | cut -f 1,3 > $OUTDIR/$PREFIX/Mem_motif.tsv
+/home/sdenecke/meme/bin/mast -hit_list $MOTIF $OUTDIR/$PREFIX/Preliminary_ABCs.faa -notext -nohtml -nostatus | tail -n +3 | head -n -1 | sed -E 's/\s+/___/g' | sed 's/___/\t/g' | cut -f 1,3 > $OUTDIR/$PREFIX/Mem_motif.tsv
 
 
 ### Make summary table
